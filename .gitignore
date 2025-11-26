@@ -1,0 +1,38 @@
+############################################################
+# Obsidian TTRPG – Public Repository Ignore Rules
+############################################################
+
+# Ignore Obsidian workspace data
+.obsidian/workspace
+.obsidian/workspace.json
+.obsidian/cache
+.obsidian/plugins/lnk-markdown-preview
+.DS_Store
+Thumbs.db
+
+############################################################
+# Worlds
+############################################################
+
+# Ignore ALL worlds by default
+Worlds/*
+
+# EXCEPT the public demo world
+!Worlds/DEMO/
+
+############################################################
+# System Media Handling
+############################################################
+
+# DO NOT ignore the folder itself — it must exist in repo
+# Ignore media content from the root ignore file:
+_system/media/*
+
+# BUT allow nested .gitignore inside to remain
+!_system/media/.gitignore
+
+############################################################
+# Nested Git Repositories
+############################################################
+
+**/.git/
