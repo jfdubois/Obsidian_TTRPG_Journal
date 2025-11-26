@@ -24,12 +24,13 @@ Worlds/*
 # System Media Handling
 ############################################################
 
-# DO NOT ignore the folder itself — it must exist in repo
-# Ignore media content from the root ignore file:
-_system/media/*
+# Exclude all files in media folders
+_system/media/images/banners
+_system/media/images/miscs
 
-# BUT allow nested .gitignore inside to remain
-!_system/media/.gitignore
+# BUT allow nested .gitkeep inside to remain
+!_system/media/images/banners/.gitkeep
+!_system/media/images/miscs/.gitkeep
 
 ############################################################
 # Nested Git Repositories
