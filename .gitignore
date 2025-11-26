@@ -19,6 +19,7 @@ Worlds/*
 
 # EXCEPT the public demo world
 !Worlds/DEMO/
+!Worlds/DEMO-DM/
 
 ############################################################
 # System Media Handling
