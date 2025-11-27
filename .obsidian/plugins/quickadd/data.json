@@ -65,6 +65,46 @@
           }
         ]
       }
+    },
+    {
+      "id": "30b07b65-5dd5-45b9-9eac-3b3c35a9e911",
+      "name": "create-encounter",
+      "type": "Macro",
+      "command": true,
+      "runOnStartup": false,
+      "macro": {
+        "name": "create-encounter",
+        "id": "b378c2ce-cc9b-4445-98a0-1a2691dedc2c",
+        "commands": [
+          {
+            "name": "createEncounter",
+            "type": "UserScript",
+            "id": "1976de47-4249-4680-aa00-b046102fd797",
+            "path": "_system/scripts/createEncounter.js",
+            "settings": {}
+          }
+        ]
+      }
+    },
+    {
+      "id": "29a8d869-374a-4bbd-b424-28f7c5af193c",
+      "name": "add-monster",
+      "type": "Macro",
+      "command": true,
+      "runOnStartup": false,
+      "macro": {
+        "name": "add-monster",
+        "id": "2170ff2e-4d6f-4f88-ab57-01fac528774b",
+        "commands": [
+          {
+            "name": "addEncounterMonsters",
+            "type": "UserScript",
+            "id": "801ad06a-e1b8-4a89-87b9-1c8b547eafa8",
+            "path": "_system/scripts/addEncounterMonsters.js",
+            "settings": {}
+          }
+        ]
+      }
     }
   ],
   "inputPrompt": "single-line",
