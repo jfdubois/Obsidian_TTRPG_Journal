@@ -2,24 +2,33 @@
 type: encounter
 world: DEMO-DM
 status: planned
-session:
-location:
-description: last one
-monsters:
-  - name: Goblin
-    qty: 2
-    initiative: individual
-    hpMode: rolled
-    labels: []
+session: 
+location: 
+description: undefined
+monsters: []
 initiatives: []
 combatLog: []
 ---
 
-# Lat one
+# Test new button
 
 *Planning phase - add monsters below*
 
 ### Actions
+name Add Monsters
+type script
+action (async () => {
+    const file = app.workspace.getActiveFile()
+    const meta = app.metadataCache.getFileCache(file)
+    const status = meta?.frontmatter?.status
+
+    if (status === "completed") {
+        new Notice("Cannot add monsters: encounter is completed")
+        return
+    }
+
+    await app.commands.executeCommandById("quickadd:choice:29a8d869-374a-4bbd-b424-28f7c5af193c")
+})();
 ```button
 name Add Monsters
 type command

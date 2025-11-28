@@ -66,10 +66,11 @@ module.exports = async function addEncounterMonsters(params) {
         const hpModeType = await suggester(
             item => item.label,
             [
+                { label: "Use Default", value: "default" },
                 { label: "Roll HP", value: "rolled" },
                 { label: "Low HP", value: "low" },
-                { label: "Average HP", value: "average" },
-                { label: "Use Default", value: "default" }
+                { label: "Average HP", value: "average" }
+
             ],
             false,
             "HP mode:"

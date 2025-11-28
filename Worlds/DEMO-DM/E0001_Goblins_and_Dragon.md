@@ -2,25 +2,15 @@
 type: encounter
 world: DEMO-DM
 status: planned
-session:
-location:
-description: will it work
-monsters:
-  - name: Goblin
-    qty: 3
-    initiative: individual
-    hpMode: rolled
-    labels: []
-  - name: Adult Bronze Dragon
-    qty: 1
-    initiative: individual
-    hpMode: rolled
-    labels: []
+session: 
+location: 
+description: Forest ambush
+monsters: []
 initiatives: []
 combatLog: []
 ---
 
-# will it work
+# Goblins and Dragon
 
 *Planning phase - add monsters below*
 
@@ -31,7 +21,11 @@ type command
 action QuickAdd: add-monster
 ```
 
-## Monsters
+```dataviewjs
+const status = dv.current().status
+
+
+```
 
 ```dataviewjs
 const monsters = dv.current().monsters || [];

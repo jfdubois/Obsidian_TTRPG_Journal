@@ -41,23 +41,6 @@ module.exports = async (params) => {
     content += `*Planning phase - add monsters below*\n\n`;
 
     content += `### Actions\n`;
-
-    content += `name Add Monsters\n`
-    content += `type script\n`
-    content += `action (async () => {\n`
-    content += `    const file = app.workspace.getActiveFile()\n`
-    content += `    const meta = app.metadataCache.getFileCache(file)\n`
-    content += `    const status = meta?.frontmatter?.status\n`
-    content += `\n`
-    content += `    if (status === "completed") {\n`
-    content += `        new Notice("Cannot add monsters: encounter is completed")\n`
-    content += `        return\n`
-    content += `    }\n`
-    content += `\n`
-    content += `    await app.commands.executeCommandById("quickadd:choice:29a8d869-374a-4bbd-b424-28f7c5af193c")\n`
-    content += `})();\n`
-
-
     content += `\`\`\`button\n`;
     content += `name Add Monsters\n`;
     content += `type command\n`;
