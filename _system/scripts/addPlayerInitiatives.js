@@ -1,4 +1,4 @@
-module.exports = async function addPlayerInitiatives(params) {
+module.exports = async (params) => {
     const { app } = params;
 
     const file = app.workspace.getActiveFile();
@@ -25,12 +25,14 @@ module.exports = async function addPlayerInitiatives(params) {
         return;
     }
 
+    const inCombat = fm.status === "inCombat";
+
     // Get characters for this world
     const characters = app.vault.getFiles()
     .filter(f => f.path.includes(`Worlds/${world}`) && f.frontmatter?.type === "character")
     .sort((a, b) => a.basename.localeCompare(b.basename));
 
-    // Build pre-filled values (FIX: strip wikilinks for comparison)
+    // Build pre-filled values
     const values = {};
     const existingInitiatives = fm.initiatives || [];
 
@@ -59,6 +61,17 @@ module.exports = async function addPlayerInitiatives(params) {
     const currentFile = app.workspace.getActiveFile();
     const currentWorld = currentFile.parent?.name || '';
 
+    // Load helpers if in combat
+    let helpers = null;
+    if (inCombat) {
+        const helpersPath = "_system/scripts/combatHelpers.js";
+        const helpersFile = app.vault.getAbstractFileByPath(helpersPath);
+        if (helpersFile) {
+            const helpersContent = await app.vault.read(helpersFile);
+            helpers = eval(helpersContent);
+        }
+    }
+
     try {
         const result = await modalForm.openForm("addPlayerInitiatives", {
             values: {
@@ -67,14 +80,13 @@ module.exports = async function addPlayerInitiatives(params) {
         });
         if (result.status === "cancelled") return;
 
-        // Parse results: collect all filled entries (FIX: more robust validation)
-        const updates = new Map(); // Use Map to track by name and avoid duplicates
+        // Parse results: collect all filled entries
+        const updates = new Map();
 
         for (let i = 1; i <= 8; i++) {
             const name = result.data[`player${i}`]?.trim();
             const initStr = result.data[`initiative${i}`]?.toString().trim();
 
-            // Skip if name is empty OR initiative is empty/invalid
             if (!name || !initStr || initStr === "") {
                 continue;
             }
@@ -85,7 +97,6 @@ module.exports = async function addPlayerInitiatives(params) {
                 continue;
             }
 
-            // Store update keyed by name (overwrites if same name appears twice)
             updates.set(name, {
                 name: `[[${name}]]`,
                 type: "character",
@@ -98,7 +109,7 @@ module.exports = async function addPlayerInitiatives(params) {
             return;
         }
 
-        // Update frontmatter: merge with existing (FIX: append/update instead of replace)
+        // Update frontmatter
         await app.fileManager.processFrontMatter(file, fm => {
             const currentInitiatives = fm.initiatives || [];
 
@@ -109,22 +120,70 @@ module.exports = async function addPlayerInitiatives(params) {
             });
 
             // Combine preserved + new/updated (sorted by initiative, descending)
-            fm.initiatives = [...preserved, ...Array.from(updates.values())]
-            .sort((a, b) => (b.initiative || 0) - (a.initiative || 0));
+            const combined = [...preserved, ...Array.from(updates.values())];
+            fm.initiatives = combined.sort((a, b) => (b.initiative || 0) - (a.initiative || 0));
+
+            // Adjust currentTurn if in combat and initiative order changed
+            if (inCombat) {
+                const currentTurn = fm.currentTurn || 0;
+                const currentCombatant = currentInitiatives[currentTurn];
+                if (currentCombatant) {
+                    const newIndex = fm.initiatives.findIndex(c =>
+                    c.name === currentCombatant.name && c.label === currentCombatant.label
+                    );
+                    if (newIndex !== -1) {
+                        fm.currentTurn = newIndex;
+                    }
+                }
+            }
         });
+
+        // If in combat, log the additions
+        if (inCombat && helpers) {
+            const round = fm.round || 1;
+            for (const [name, data] of updates) {
+                const logEntry = helpers.formatLogEntry(round, name, "joined", "", data.initiative);
+                await addCombatLog(app, file, logEntry);
+            }
+        }
 
         new Notice(`Updated ${updates.size} initiative(s)!`);
 
-        // Refresh view if in combat
-        if (fm.status === "inCombat") {
-            const activeView = app.workspace.getActiveViewOfType(MarkdownView);
-            if (activeView) {
-                app.workspace.trigger('file-open', activeView.file);
+        // Refresh view - force re-render of dataview blocks
+        setTimeout(() => {
+            const leaf = app.workspace.getLeaf(false);
+            if (leaf && leaf.view && leaf.view.file === file) {
+                app.workspace.trigger('dataview:refresh-views');
             }
-        }
+        }, 100);
 
     } catch (e) {
         new Notice("Error processing form. Check console for details.");
         console.error(e);
     }
 };
+
+async function addCombatLog(app, file, logEntry) {
+    let content = await app.vault.read(file);
+
+    // Find Combat Log section
+    const logIndex = content.indexOf('## Combat Log');
+    if (logIndex === -1) return;
+
+    // Find the end of the header line
+    const logStart = content.indexOf('\n', logIndex) + 1;
+
+    // Skip any existing description text
+    let insertPoint = logStart;
+    const lines = content.substring(logStart).split('\n');
+    for (let i = 0; i < lines.length; i++) {
+        if (lines[i].trim().startsWith('_')) {
+            insertPoint = logStart + lines[i].length + 1;
+        } else {
+            break;
+        }
+    }
+
+    content = content.substring(0, insertPoint) + logEntry + '\n' + content.substring(insertPoint);
+    await app.vault.modify(file, content);
+}

@@ -105,6 +105,126 @@
           }
         ]
       }
+    },
+    {
+      "id": "6d20f6d9-30c1-489c-a24f-f7d7d1aece20",
+      "name": "add-player-initiative",
+      "type": "Macro",
+      "command": true,
+      "runOnStartup": false,
+      "macro": {
+        "name": "add-player-initiative",
+        "id": "eaf513eb-b19d-4516-9a6d-f1a44fa74bc2",
+        "commands": [
+          {
+            "name": "addPlayerInitiatives",
+            "type": "UserScript",
+            "id": "dcdfe817-3167-4027-a170-0156241c6947",
+            "path": "_system/scripts/addPlayerInitiatives.js",
+            "settings": {}
+          }
+        ]
+      }
+    },
+    {
+      "id": "7bc7f3fb-abc9-4dd3-9017-db69b2145855",
+      "name": "combat-damage",
+      "type": "Macro",
+      "command": true,
+      "runOnStartup": false,
+      "macro": {
+        "name": "combat-damage",
+        "id": "f01a36c4-c693-484b-a231-700e48cba1be",
+        "commands": [
+          {
+            "name": "combatDamage",
+            "type": "UserScript",
+            "id": "8db50e3a-33f9-4bef-ac39-8e78303e4270",
+            "path": "_system/scripts/combatDamage.js",
+            "settings": {}
+          }
+        ]
+      }
+    },
+    {
+      "id": "bc6e6f48-df65-46e2-82be-de57d08b028d",
+      "name": "combat-heal",
+      "type": "Macro",
+      "command": true,
+      "runOnStartup": false,
+      "macro": {
+        "name": "combat-heal",
+        "id": "1b8ba987-5ca8-44d7-aa67-440a6129531c",
+        "commands": [
+          {
+            "name": "combatHeal",
+            "type": "UserScript",
+            "id": "425ba1ee-6714-4dc9-b2b4-d2340ff1191f",
+            "path": "_system/scripts/combatHeal.js",
+            "settings": {}
+          }
+        ]
+      }
+    },
+    {
+      "id": "57ca060c-b389-4e4b-b790-6a6e9f0ea5eb",
+      "name": "end-combat",
+      "type": "Macro",
+      "command": true,
+      "runOnStartup": false,
+      "macro": {
+        "name": "end-combat",
+        "id": "d920568b-6987-4608-825b-651d771e5beb",
+        "commands": [
+          {
+            "name": "endCombat",
+            "type": "UserScript",
+            "id": "3f060783-9155-42be-a4d1-8f4e57c4be32",
+            "path": "_system/scripts/endCombat.js",
+            "settings": {}
+          }
+        ]
+      }
+    },
+    {
+      "id": "b2e0ddd0-ee2c-4a31-a357-4578fb774aed",
+      "name": "enable-combat",
+      "type": "Macro",
+      "command": true,
+      "runOnStartup": false,
+      "macro": {
+        "name": "enable-combat",
+        "id": "7f1252ad-4393-4ab2-9e26-2d345ec50bac",
+        "commands": [
+          {
+            "name": "enableCombat",
+            "type": "UserScript",
+            "id": "009e82da-a3e1-44f0-98cd-12c94f67d912",
+            "path": "_system/scripts/enableCombat.js",
+            "settings": {}
+          }
+        ]
+      }
+    },
+    {
+      "id": "e906320e-581d-43a0-b805-f37d6ffe6593",
+      "name": "next-turn",
+      "type": "Macro",
+      "command": true,
+      "runOnStartup": false,
+      "macro": {
+        "name": "next-turn",
+        "id": "ac3870b6-c0ce-4782-afc0-81f558ab2e16",
+        "commands": [
+          {
+            "name": "nextTurn",
+            "type": "UserScript",
+            "id": "5933fcf4-4a11-4986-acda-99a3212eaa7a",
+            "path": "_system/scripts/nextTurn.js",
+            "settings": {}
+          }
+        ]
+      }
     }
   ],
   "inputPrompt": "single-line",
