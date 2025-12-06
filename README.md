@@ -2,8 +2,6 @@
 
 This personal project was created to help me take structured notes for my TTRPG campaign and to share it with anyone who may find it useful.
 
-The first version focuses on creating **player-facing campaigns**, but I am currently working on adding a **DM role** and related features.
-
 # Credits
 
 Most of this project is based on an existing system built by _Nicole van der Hoeven_ and adapted to my needs.
@@ -17,6 +15,8 @@ A central **`world.md`** note is used to manage the campaign during creation. It
 - Create entities
     
 - Generate session notes
+	
+- Generate encounters as DM
     
 - View all campaign entities in one place
     

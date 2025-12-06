@@ -4,7 +4,7 @@ campaign: DEMO-DM
 status: active
 role: dm
 type: world
-system: 
+system: DnD 5e 2024
 banner: "![[world-banner.jpg]]"
 ---
 # The world of DEMO-DM
