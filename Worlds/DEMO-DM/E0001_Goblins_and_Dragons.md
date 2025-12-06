@@ -2,42 +2,32 @@
 type: encounter
 world: DEMO-DM
 status: inCombat
-round: 3
-currentTurn: 4
+round: 1
+currentTurn: 1
 session:
 location:
-description: test 6
+description: Mountain top epic fight
 monsters:
   - name: Goblin
     qty: 4
     initiative: group
     hpMode: default
     labels: []
-  - name: Hobgoblin
+  - name: Adult Bronze Dragon
+    qty: 1
+    initiative: individual
+    hpMode: default
+    labels: []
+  - name: Adult Red Dragon
     qty: 1
     initiative: individual
     hpMode: default
     labels: []
 initiatives:
-  - name: Hobgoblin
-    label: E5
-    type: monster
-    initiative: 20
-    maxHp: 11
-    currentHp: 11
-    ac: 18 (Chain Mail, Shield)
-    speed: "30 ft. "
-    status: healthy
-  - name: "[[Nes]]"
-    type: character
-    initiative: 15
-  - name: "[[Baikai]]"
-    type: character
-    initiative: 13
   - name: Goblin
     label: G1
     type: monster
-    initiative: 11
+    initiative: 19
     maxHp: 7
     currentHp: 7
     ac: 15 (Leather Armor, Shield)
@@ -46,7 +36,7 @@ initiatives:
   - name: Goblin
     label: G2
     type: monster
-    initiative: 11
+    initiative: 19
     maxHp: 7
     currentHp: 7
     ac: 15 (Leather Armor, Shield)
@@ -55,7 +45,7 @@ initiatives:
   - name: Goblin
     label: G3
     type: monster
-    initiative: 11
+    initiative: 19
     maxHp: 7
     currentHp: 7
     ac: 15 (Leather Armor, Shield)
@@ -64,25 +54,46 @@ initiatives:
   - name: Goblin
     label: G4
     type: monster
-    initiative: 11
+    initiative: 19
     maxHp: 7
     currentHp: 7
     ac: 15 (Leather Armor, Shield)
     speed: "30 ft. "
     status: healthy
-  - name: "[[Wal]]"
+  - name: "[[Player 3]]"
+    type: character
+    initiative: 18
+  - name: Adult Red Dragon
+    label: F6
+    type: monster
+    initiative: 13
+    maxHp: 256
+    currentHp: 256
+    ac: 19 (Natural Armor)
+    speed: "40 ft., climb 40 ft., fly 80 ft. "
+    status: healthy
+  - name: "[[Player 1]]"
+    type: character
+    initiative: 10
+  - name: "[[Player 2]]"
     type: character
     initiative: 5
-  - name: "[[Eryn]]"
-    type: character
-    initiative: 1
+  - name: Adult Bronze Dragon
+    label: E5
+    type: monster
+    initiative: 2
+    maxHp: 212
+    currentHp: 212
+    ac: 19 (Natural Armor)
+    speed: "40 ft., fly 80 ft., swim 40 ft. "
+    status: healthy
 ---
 
-# goblin test 6
+# Goblins and Dragons
 
 ## Description
 
-test 6
+Mountain top epic fight
 
 ## Monster's Notes
 
@@ -250,9 +261,5 @@ if (initiatives.length === 0) {
 ```
 
 ## Combat Log
-- **Round 3** [12:07 AM] - Goblin (G2) dealt **4 bludgeoning damage** to [[Baikai]]
-- **Round 3** [12:06 AM] - ⚔️ Baikai joined combat (Initiative: 13)
-- **Round 3** [12:06 AM] - ⚔️ Hobgoblin (E5) joined combat (Initiative: 20)
-🔄 **Round 3 begins!**
-🔄 **Round 2 begins!**
+- **Round 1** [01:02 PM] - Goblin (G1) dealt **4 piercing damage** to [[Player 3]]
 
