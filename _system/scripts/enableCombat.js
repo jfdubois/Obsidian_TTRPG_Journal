@@ -142,45 +142,45 @@ async function regenerateCombatTracker(app, file, initiatives, round, currentTur
     tracker += `const currentTurn = dv.current().currentTurn || 0;\n\n`;
 
     tracker += `if (initiatives.length === 0) {\n`;
-        tracker += `    dv.paragraph("_No combatants in initiative._");\n`;
-        tracker += `} else {\n`;
-            tracker += `    const table = dv.container.createEl("table");\n`;
-            tracker += `    table.style.width = "100%";\n`;
-            tracker += `    const thead = table.createEl("thead");\n`;
-            tracker += `    const headerRow = thead.createEl("tr");\n`;
-            tracker += `    ["Turn", "Name", "Label", "Initiative", "HP", "AC", "Speed", "Status"].forEach(h => {\n`;
-                tracker += `        headerRow.createEl("th", { text: h });\n`;
-                tracker += `    });\n`;
-                tracker += `    const tbody = table.createEl("tbody");\n`;
-                tracker += `    initiatives.forEach((combatant, idx) => {\n`;
-                    tracker += `        const row = tbody.createEl("tr");\n`;
-                    tracker += `        if (idx === currentTurn) {\n`;
-                        tracker += `            row.style.backgroundColor = "var(--background-modifier-success)";\n`;
-                        tracker += `            row.style.fontWeight = "bold";\n`;
-                        tracker += `        }\n`;
-                        tracker += `        const turnCell = row.createEl("td", { text: idx === currentTurn ? "➤" : "" });\n`;
-                        tracker += `        turnCell.style.textAlign = "center";\n`;
-                        tracker += `        row.createEl("td", { text: combatant.name || "Unknown" });\n`;
-                        tracker += `        row.createEl("td", { text: combatant.label || "--" });\n`;
-                        tracker += `        row.createEl("td", { text: combatant.initiative || 0 });\n`;
-                        tracker += `        const hp = combatant.type === "monster" ? \`\${combatant.currentHp}/\${combatant.maxHp}\` : "--";\n`;
-                        tracker += `        row.createEl("td", { text: hp });\n`;
-                        tracker += `        row.createEl("td", { text: combatant.ac || "--" });\n`;
-                        tracker += `        row.createEl("td", { text: combatant.speed || "--" });\n`;
-                        tracker += `        row.createEl("td", { text: combatant.status || "healthy" });\n`;
-                        tracker += `    });\n`;
-                        tracker += `}\n`;
-                        tracker += `\`\`\`\n\n`;
+    tracker += `    dv.paragraph("_No combatants in initiative._");\n`;
+    tracker += `} else {\n`;
+    tracker += `    const table = dv.container.createEl("table");\n`;
+    tracker += `    table.style.width = "100%";\n`;
+    tracker += `    const thead = table.createEl("thead");\n`;
+    tracker += `    const headerRow = thead.createEl("tr");\n`;
+    tracker += `    ["Turn", "Name", "Label", "Initiative", "HP", "AC", "Speed", "Status"].forEach(h => {\n`;
+    tracker += `        headerRow.createEl("th", { text: h });\n`;
+    tracker += `    });\n`;
+    tracker += `    const tbody = table.createEl("tbody");\n`;
+    tracker += `    initiatives.forEach((combatant, idx) => {\n`;
+    tracker += `        const row = tbody.createEl("tr");\n`;
+    tracker += `        if (idx === currentTurn) {\n`;
+    tracker += `            row.style.backgroundColor = "var(--background-modifier-success)";\n`;
+    tracker += `            row.style.fontWeight = "bold";\n`;
+    tracker += `        }\n`;
+    tracker += `        const turnCell = row.createEl("td", { text: idx === currentTurn ? "➤" : "" });\n`;
+    tracker += `        turnCell.style.textAlign = "center";\n`;
+    tracker += `        row.createEl("td", { text: combatant.name || "Unknown" });\n`;
+    tracker += `        row.createEl("td", { text: combatant.label || "--" });\n`;
+    tracker += `        row.createEl("td", { text: combatant.initiative || 0 });\n`;
+    tracker += `        const hp = combatant.type === "monster" ? \`\${combatant.currentHp}/\${combatant.maxHp}\` : "--";\n`;
+    tracker += `        row.createEl("td", { text: hp });\n`;
+    tracker += `        row.createEl("td", { text: combatant.ac || "--" });\n`;
+    tracker += `        row.createEl("td", { text: combatant.speed || "--" });\n`;
+    tracker += `        row.createEl("td", { text: combatant.status || "healthy" });\n`;
+    tracker += `    });\n`;
+    tracker += `}\n`;
+    tracker += `\`\`\`\n\n`;
 
-                        // Replace content between Initiative and Combat Log
-                        const beforeInitiative = content.substring(0, initiativeStart);
-                        const afterCombatLog = content.substring(combatLogStart);
+    // Replace content between Initiative and Combat Log
+    const beforeInitiative = content.substring(0, initiativeStart);
+    const afterCombatLog = content.substring(combatLogStart);
 
-                        content = beforeInitiative + tracker + afterCombatLog;
+    content = beforeInitiative + tracker + afterCombatLog;
 
-                        console.log("✏️ New content length:", content.length);
-                        console.log("📝 Tracker length:", tracker.length);
+    console.log("✏️ New content length:", content.length);
+    console.log("📝 Tracker length:", tracker.length);
 
-                        await app.vault.modify(file, content);
-                        console.log("✅ File modified successfully");
+    await app.vault.modify(file, content);
+    console.log("✅ File modified successfully");
 }
