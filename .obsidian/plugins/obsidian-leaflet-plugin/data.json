@@ -1,0 +1,108 @@
+{
+  "mapMarkers": [
+    {
+      "id": "DEMO-Obsidia_worldmap",
+      "lastAccessed": 1762738343497,
+      "markers": [
+        {
+          "id": "ID_f968e99a8ba8",
+          "type": "default",
+          "loc": [
+            868.7617467510487,
+            1089.4899217020522
+          ],
+          "link": "Dask",
+          "layer": "%5B%5BWorlds%2FDEMO-Obsidia%2FRessources%2Fworldmap.jpg%5D%5D",
+          "mutable": true,
+          "command": false,
+          "percent": null,
+          "description": null,
+          "minZoom": null,
+          "maxZoom": null,
+          "tooltip": "hover"
+        }
+      ],
+      "overlays": [],
+      "shapes": [],
+      "files": []
+    },
+    {
+      "id": "MapCalcExample",
+      "lastAccessed": 1762811561698,
+      "markers": [
+        {
+          "id": "ID_794aabba496b",
+          "type": "default",
+          "loc": [
+            1341.7067734017742,
+            1471.7714233398438
+          ],
+          "layer": "%5B%5BWorldmap.jpg%5D%5D",
+          "mutable": true,
+          "command": false,
+          "percent": null,
+          "description": null,
+          "minZoom": null,
+          "maxZoom": null,
+          "tooltip": "hover"
+        },
+        {
+          "id": "ID_084aaafa5b89",
+          "type": "default",
+          "loc": [
+            1800.2046122317493,
+            1641.7403178087459
+          ],
+          "layer": "%5B%5BWorldmap.jpg%5D%5D",
+          "mutable": true,
+          "command": false,
+          "percent": null,
+          "description": null,
+          "minZoom": null,
+          "maxZoom": null,
+          "tooltip": "hover"
+        }
+      ],
+      "overlays": [],
+      "shapes": [],
+      "files": [
+        "Worlds/Les Portes des eternels supplicites/Feywild.md"
+      ]
+    }
+  ],
+  "defaultMarker": {
+    "type": "default",
+    "iconName": "map-marker",
+    "color": "#bd3232",
+    "transform": {
+      "size": 6,
+      "x": 0,
+      "y": -2
+    }
+  },
+  "markerIcons": [],
+  "color": "#dddddd",
+  "lat": 39.983334,
+  "long": -82.98333,
+  "notePreview": false,
+  "layerMarkers": true,
+  "previousVersion": "6.0.5",
+  "version": {
+    "major": 6,
+    "minor": 0,
+    "patch": 5
+  },
+  "warnedAboutMapMarker": false,
+  "copyOnClick": false,
+  "displayMarkerTooltips": "hover",
+  "displayOverlayTooltips": true,
+  "configDirectory": null,
+  "mapViewEnabled": true,
+  "mapViewParameters": {},
+  "enableDraw": true,
+  "defaultUnitType": "imperial",
+  "defaultTile": "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png",
+  "defaultTileDark": "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png",
+  "defaultAttribution": "&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors &copy; <a href=\"https://carto.com/attributions\">CARTO</a>",
+  "defaultTileSubdomains": "a,b,c,d"
+}

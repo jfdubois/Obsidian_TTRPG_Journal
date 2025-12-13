@@ -1,0 +1,39 @@
+.theme-light .callout[data-callout="combat"] {
+    --callout-color: 165,27,26;
+    --callout-icon: lucide-swords;
+}
+
+.theme-dark .callout[data-callout="combat"] {
+    --callout-color: 165,27,26;
+    --callout-icon: lucide-swords;
+}
+
+.theme-light .callout[data-callout="initiative"] {
+    --callout-color: 100,100,100;
+    --callout-icon: lucide-dices;
+}
+
+.theme-dark .callout[data-callout="initiative"] {
+    --callout-color: 100,100,100;
+    --callout-icon: lucide-dices;
+}
+
+.theme-light .callout[data-callout="monster"] {
+    --callout-color: 150,0,0;
+    --callout-icon: lucide-skull;
+}
+
+.theme-dark .callout[data-callout="monster"] {
+    --callout-color: 150,0,0;
+    --callout-icon: lucide-skull;
+}
+
+.theme-light .callout[data-callout="loot"] {
+    --callout-color: 78,110,88;
+    --callout-icon: lucide-gem;
+}
+
+.theme-dark .callout[data-callout="loot"] {
+    --callout-color: 78,110,88;
+    --callout-icon: lucide-gem;
+}

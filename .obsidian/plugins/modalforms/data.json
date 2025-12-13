@@ -1,0 +1,267 @@
+{
+  "editorPosition": "mainView",
+  "attachShortcutToGlobalWindow": false,
+  "globalNamespace": "MF",
+  "formDefinitions": [
+    {
+      "title": "Create an entity",
+      "name": "newEntity",
+      "fields": [
+        {
+          "name": "entityWorld",
+          "label": "entityWorld",
+          "description": "",
+          "isRequired": false,
+          "input": {
+            "type": "text",
+            "hidden": true
+          }
+        },
+        {
+          "name": "entityType",
+          "label": "Type",
+          "description": "",
+          "isRequired": false,
+          "input": {
+            "type": "select",
+            "source": "fixed",
+            "options": [
+              {
+                "value": "character",
+                "label": "Character"
+              },
+              {
+                "value": "npc",
+                "label": "NPC"
+              },
+              {
+                "value": "place",
+                "label": "Place"
+              },
+              {
+                "value": "store",
+                "label": "Store"
+              },
+              {
+                "value": "faction",
+                "label": "Faction"
+              },
+              {
+                "value": "region",
+                "label": "Region"
+              },
+              {
+                "value": "plane",
+                "label": "Plane"
+              },
+              {
+                "value": "quest",
+                "label": "Quest"
+              }
+            ]
+          }
+        },
+        {
+          "name": "entityName",
+          "label": "Name",
+          "description": "",
+          "isRequired": false,
+          "input": {
+            "type": "text",
+            "hidden": false
+          }
+        },
+        {
+          "name": "entityDescription",
+          "label": "Short Description",
+          "description": "",
+          "isRequired": false,
+          "input": {
+            "type": "text",
+            "hidden": false
+          }
+        },
+        {
+          "name": "entityPlane",
+          "label": "Plane",
+          "description": "",
+          "isRequired": false,
+          "input": {
+            "type": "dataview",
+            "query": "dv.pages()\n  .where(p => p.type === \"plane\" && p.world === form.entityWorld)\n  .map(p => p.file.name)"
+          }
+        },
+        {
+          "name": "entityRegion",
+          "label": "Region",
+          "description": "",
+          "isRequired": false,
+          "input": {
+            "type": "dataview",
+            "query": "dv.pages()\n  .where(p => p.type === \"region\" && p.world === form.entityWorld)\n  .map(p => p.file.name)"
+          }
+        },
+        {
+          "name": "entityLocation",
+          "label": "Location",
+          "description": "",
+          "isRequired": false,
+          "input": {
+            "type": "dataview",
+            "query": "dv.pages()\n  .where(p => p.type === \"place\" && p.world === form.entityWorld)\n  .map(p => p.file.name)"
+          }
+        },
+        {
+          "name": "entityOccupation",
+          "label": "Occupation",
+          "description": "",
+          "isRequired": false,
+          "condition": {
+            "dependencyName": "entityType",
+            "type": "isExactly",
+            "value": "npc"
+          },
+          "input": {
+            "type": "text",
+            "hidden": false
+          }
+        },
+        {
+          "name": "entityFaction",
+          "label": "Faction",
+          "description": "",
+          "isRequired": false,
+          "condition": {
+            "dependencyName": "entityType",
+            "type": "isExactly",
+            "value": "npc"
+          },
+          "input": {
+            "type": "dataview",
+            "query": "dv.pages()\n  .where(p => p.type === \"faction\" && p.world === form.entityWorld)\n  .map(p => p.file.name)"
+          }
+        },
+        {
+          "name": "entityRace",
+          "label": "Race",
+          "description": "",
+          "isRequired": false,
+          "condition": {
+            "dependencyName": "entityType",
+            "type": "isExactly",
+            "value": "npc"
+          },
+          "input": {
+            "type": "text",
+            "hidden": false
+          }
+        },
+        {
+          "name": "entityGender",
+          "label": "Gender",
+          "description": "",
+          "isRequired": false,
+          "condition": {
+            "dependencyName": "entityType",
+            "type": "isExactly",
+            "value": "npc"
+          },
+          "input": {
+            "type": "select",
+            "source": "fixed",
+            "options": [
+              {
+                "value": "male",
+                "label": "Male"
+              },
+              {
+                "value": "female",
+                "label": "Female"
+              },
+              {
+                "value": "undefined",
+                "label": "Undefined"
+              }
+            ]
+          }
+        },
+        {
+          "name": "entityClass",
+          "label": "Class",
+          "description": "",
+          "isRequired": false,
+          "condition": {
+            "dependencyName": "entityType",
+            "type": "isExactly",
+            "value": "npc"
+          },
+          "input": {
+            "type": "text",
+            "hidden": false
+          }
+        },
+        {
+          "name": "entityRuler",
+          "label": "Ruler",
+          "description": "",
+          "isRequired": false,
+          "condition": {
+            "dependencyName": "entityType",
+            "type": "isExactly",
+            "value": "place"
+          },
+          "input": {
+            "type": "dataview",
+            "query": "dv.pages()\n  .where(p => p.type === \"npc\" && p.world === form.entityWorld)\n  .map(p => p.file.name)"
+          }
+        },
+        {
+          "name": "entityOwner",
+          "label": "Owner",
+          "description": "",
+          "isRequired": false,
+          "condition": {
+            "dependencyName": "entityType",
+            "type": "isExactly",
+            "value": "store"
+          },
+          "input": {
+            "type": "dataview",
+            "query": "dv.pages()\n  .where(p => p.type === \"npc\" && p.world === form.entityWorld)\n  .map(p => p.file.name)"
+          }
+        },
+        {
+          "name": "entityLeader",
+          "label": "Leader",
+          "description": "",
+          "isRequired": false,
+          "condition": {
+            "dependencyName": "entityType",
+            "type": "isExactly",
+            "value": "faction"
+          },
+          "input": {
+            "type": "dataview",
+            "query": "dv.pages()\n  .where(p => p.type === \"npc\" && p.world === form.entityWorld)\n  .map(p => p.file.name)"
+          }
+        },
+        {
+          "name": "entityGivenBy",
+          "label": "Given by",
+          "description": "",
+          "isRequired": false,
+          "condition": {
+            "dependencyName": "entityType",
+            "type": "isExactly",
+            "value": "quest"
+          },
+          "input": {
+            "type": "dataview",
+            "query": "dv.pages()\n  .where(p => p.type === \"npc\" && p.world === form.entityWorld)\n  .map(p => p.file.name)"
+          }
+        }
+      ],
+      "version": "1"
+    }
+  ]
+}

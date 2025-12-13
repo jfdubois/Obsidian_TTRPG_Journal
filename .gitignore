@@ -1,0 +1,14 @@
+.obsidian/workspace*
+.obsidian/cache
+.obsidian/plugins/**/node_modules/
+.obsidian/plugins/**/dist/
+.obsidian/plugins/**/build/
+.obsidian/plugins/**/*.log
+.DS_Store
+Thumbs.db
+.directory
+Worlds/*
+!Worlds/.gitkeep
+_system/media/*
+!_system/media/.gitkeep
+**/.git/
