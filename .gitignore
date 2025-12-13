@@ -8,7 +8,7 @@
 Thumbs.db
 .directory
 Worlds/*
-!Worlds/.gitkeep
+!Worlds/TTRPG Game Index.md
 _system/media/*
 !_system/media/.gitkeep
 **/.git/
