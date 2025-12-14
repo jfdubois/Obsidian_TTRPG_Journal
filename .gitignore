@@ -12,3 +12,4 @@ Worlds/*
 _system/media/*
 !_system/media/.gitkeep
 **/.git/
+.CODING_GUIDELINES.md
