@@ -65,6 +65,146 @@
           }
         ]
       }
+    },
+    {
+      "id": "5a646746-13e2-4afc-b6b6-ff27b4f261cb",
+      "name": "create-encounter",
+      "type": "Macro",
+      "command": true,
+      "runOnStartup": false,
+      "macro": {
+        "name": "create-encounter",
+        "id": "2b798c9f-4903-43d9-970e-f96350c0fc06",
+        "commands": [
+          {
+            "name": "createEncounter",
+            "type": "UserScript",
+            "id": "785689d1-2f03-482e-a8ac-22be0a231e88",
+            "path": "_system/scripts/createEncounter.js",
+            "settings": {}
+          }
+        ]
+      }
+    },
+    {
+      "id": "4902bcff-ed8d-4b2a-bd16-ff86ee3f72a2",
+      "name": "add-monster",
+      "type": "Macro",
+      "command": true,
+      "runOnStartup": false,
+      "macro": {
+        "name": "add-monster",
+        "id": "c9719834-2da1-40d0-8e4e-09bbc84544f6",
+        "commands": [
+          {
+            "name": "addEncounterMonsters",
+            "type": "UserScript",
+            "id": "ca8fdbec-be85-4f21-9733-8809e55ed760",
+            "path": "_system/scripts/addEncounterMonsters.js",
+            "settings": {}
+          }
+        ]
+      }
+    },
+    {
+      "id": "37b0f59e-9039-4bef-925c-3e0c48d2962e",
+      "name": "add-player-initiative",
+      "type": "Macro",
+      "command": true,
+      "runOnStartup": false,
+      "macro": {
+        "name": "add-player-initiative",
+        "id": "3fd009e1-07b0-4adc-9716-26c6a16670be",
+        "commands": [
+          {
+            "name": "addPlayerInitiatives",
+            "type": "UserScript",
+            "id": "30b7a4a4-b086-499c-ae14-c26886c9fba8",
+            "path": "_system/scripts/addPlayerInitiatives.js",
+            "settings": {}
+          }
+        ]
+      }
+    },
+    {
+      "id": "3e61bb83-fbd3-4cfa-ad2d-6262ff5668d3",
+      "name": "start-combat",
+      "type": "Macro",
+      "command": true,
+      "runOnStartup": false,
+      "macro": {
+        "name": "start-combat",
+        "id": "ae4f9d11-be8b-4c7c-b315-b5c8e0779a69",
+        "commands": [
+          {
+            "name": "enableCombat",
+            "type": "UserScript",
+            "id": "7814c959-1388-49c9-82d9-7b8f4b5fb4c3",
+            "path": "_system/scripts/enableCombat.js",
+            "settings": {}
+          }
+        ]
+      }
+    },
+    {
+      "id": "9aba47dc-5235-4115-9b3b-d36a7a5c1e17",
+      "name": "next-turn",
+      "type": "Macro",
+      "command": true,
+      "runOnStartup": false,
+      "macro": {
+        "name": "next-turn",
+        "id": "0480cd76-a2b7-458a-88d9-09a05291a612",
+        "commands": [
+          {
+            "name": "nextTurn",
+            "type": "UserScript",
+            "id": "ee5b0a3d-9bac-43c5-b23d-65ddd9622bc3",
+            "path": "_system/scripts/nextTurn.js",
+            "settings": {}
+          }
+        ]
+      }
+    },
+    {
+      "id": "5e4afbd1-eb29-4ee0-8c2a-2f7c8685688e",
+      "name": "combat-damage",
+      "type": "Macro",
+      "command": true,
+      "runOnStartup": false,
+      "macro": {
+        "name": "combat-damage",
+        "id": "09c558bf-9f3b-40c0-a9d1-1a7fd0581db7",
+        "commands": [
+          {
+            "name": "combatDamage",
+            "type": "UserScript",
+            "id": "33e03281-1274-4af6-aa84-d1658ac3e8fb",
+            "path": "_system/scripts/combatDamage.js",
+            "settings": {}
+          }
+        ]
+      }
+    },
+    {
+      "id": "00265e50-3c7e-43ec-b29e-f329c901ab78",
+      "name": "combat-heal",
+      "type": "Macro",
+      "command": true,
+      "runOnStartup": false,
+      "macro": {
+        "name": "combat-heal",
+        "id": "c6c8be34-33a4-4ede-a831-f0ec2becb678",
+        "commands": [
+          {
+            "name": "combatHeal",
+            "type": "UserScript",
+            "id": "89678ec9-f3a2-464b-a195-08ca03fc7658",
+            "path": "_system/scripts/combatHeal.js",
+            "settings": {}
+          }
+        ]
+      }
     }
   ],
   "inputPrompt": "single-line",

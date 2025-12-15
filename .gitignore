@@ -9,7 +9,11 @@ Thumbs.db
 .directory
 Worlds/*
 !Worlds/TTRPG Game Index.md
-_system/media/*
-!_system/media/.gitkeep
+_system/media/images/miscs/*
+!_system/media/images/miscs/.gitkeep
+_system/media/images/banners/*
+!_system/media/images/banners/.gitkeep
+_system/srd/*
+!_system/srd/sources.md
 **/.git/
 .CODING_GUIDELINES.md
