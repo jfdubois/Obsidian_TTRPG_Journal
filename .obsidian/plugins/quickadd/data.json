@@ -1,26 +1,6 @@
 {
   "choices": [
     {
-      "id": "e66ecbd4-f822-4b6e-84f7-16bb3b9d0b32",
-      "name": "create-world",
-      "type": "Macro",
-      "command": true,
-      "runOnStartup": false,
-      "macro": {
-        "name": "create-world",
-        "id": "90aaeb92-1a46-4b79-9f0d-3de1558c3c13",
-        "commands": [
-          {
-            "name": "createWorld",
-            "type": "UserScript",
-            "id": "bfc33d20-afd6-42fa-a3b1-e095f21b100e",
-            "path": "_system/scripts/quickadd/macros.js",
-            "settings": {}
-          }
-        ]
-      }
-    },
-    {
       "id": "5ba89945-a91b-440c-8f8e-368a67aa7a52",
       "name": "create-session",
       "type": "Macro",
@@ -80,7 +60,7 @@
             "name": "createEncounter",
             "type": "UserScript",
             "id": "785689d1-2f03-482e-a8ac-22be0a231e88",
-            "path": "_system/scripts/quickadd/macros.js",
+            "path": "_system/scripts/quickadd/createEncounter.js",
             "settings": {}
           }
         ]
@@ -100,7 +80,7 @@
             "name": "addMonsters",
             "type": "UserScript",
             "id": "ca8fdbec-be85-4f21-9733-8809e55ed760",
-            "path": "_system/scripts/quickadd/macros.js",
+            "path": "_system/scripts/quickadd/addMonsters.js",
             "settings": {}
           }
         ]
@@ -120,7 +100,7 @@
             "name": "playersInitiatives",
             "type": "UserScript",
             "id": "30b7a4a4-b086-499c-ae14-c26886c9fba8",
-            "path": "_system/scripts/quickadd/macros.js",
+            "path": "_system/scripts/quickadd/playersInitiatives.js",
             "settings": {}
           }
         ]
@@ -140,7 +120,7 @@
             "name": "enableCombat",
             "type": "UserScript",
             "id": "7814c959-1388-49c9-82d9-7b8f4b5fb4c3",
-            "path": "_system/scripts/quickadd/macros.js",
+            "path": "_system/scripts/quickadd/enableCombat.js",
             "settings": {}
           }
         ]
@@ -160,7 +140,7 @@
             "name": "nextTurn",
             "type": "UserScript",
             "id": "ee5b0a3d-9bac-43c5-b23d-65ddd9622bc3",
-            "path": "_system/scripts/quickadd/macros.js",
+            "path": "_system/scripts/quickadd/nextTurn.js",
             "settings": {}
           }
         ]
@@ -180,7 +160,7 @@
             "name": "applyDamage",
             "type": "UserScript",
             "id": "33e03281-1274-4af6-aa84-d1658ac3e8fb",
-            "path": "_system/scripts/quickadd/macros.js",
+            "path": "_system/scripts/quickadd/applyDamage.js",
             "settings": {}
           }
         ]
@@ -200,7 +180,7 @@
             "name": "applyHealing",
             "type": "UserScript",
             "id": "89678ec9-f3a2-464b-a195-08ca03fc7658",
-            "path": "_system/scripts/quickadd/macros.js",
+            "path": "_system/scripts/quickadd/applyHealing.js",
             "settings": {}
           }
         ]
@@ -220,7 +200,27 @@
             "name": "endCombat",
             "type": "UserScript",
             "id": "c3d4e5f6-a7b8-9012-cdef-123456789012",
-            "path": "_system/scripts/quickadd/macros.js",
+            "path": "_system/scripts/quickadd/endCombat.js",
+            "settings": {}
+          }
+        ]
+      }
+    },
+    {
+      "id": "0c482e62-d4ef-49df-a1ea-fa8f7e7ad8b1",
+      "name": "create-world",
+      "type": "Macro",
+      "command": true,
+      "runOnStartup": false,
+      "macro": {
+        "name": "create-world",
+        "id": "fa0d20ae-5cd5-4257-84e7-26173e78540a",
+        "commands": [
+          {
+            "name": "createWorld",
+            "type": "UserScript",
+            "id": "7ddecf6c-c019-4c61-88a7-6f9ee1c65754",
+            "path": "_system/scripts/quickadd/createWorld.js",
             "settings": {}
           }
         ]
