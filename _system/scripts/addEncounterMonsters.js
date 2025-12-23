@@ -132,12 +132,19 @@ module.exports = async function addEncounterMonsters(params) {
         // ---------------------------------------------------
         // Push to temporary monster list
         // ---------------------------------------------------
+        let plannedMonster = true
+
+        if (fm.type === "inCombat") {
+            plannedMonster = false
+        }
+
         newMonsters.push({
             name: monsterNameOnly,
             source: selectedMonster?.source || 'Unknown',
             qty: qty,
             initiative: initiative,
             hpMode: hpMode,
+            planned: plannedMonster,
             labels: []
         });
 
