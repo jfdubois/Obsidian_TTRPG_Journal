@@ -9,7 +9,8 @@ module.exports = async (params) => {
             return;
         }
 
-        await jsEngine.api.executeFileSimple('_system/scripts/actions/combat/playersInitiatives.js', {
+        const module = await jsEngine.api.importJs('_system/scripts/actions/combat/playersInitiatives.js');
+        await module.run({
             app: params.app,
             quickAddApi: params.quickAddApi
         });
