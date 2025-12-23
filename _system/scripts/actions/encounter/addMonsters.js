@@ -3,13 +3,14 @@
  * Add monsters to a planned encounter from SRD
  */
 
+import * as core from '../../lib/core.js';
+import * as ui from '../../lib/ui.js';
+import * as monstersLib from '../../lib/monsters.js';
+
 export async function run(context) {
     const { app, quickAddApi } = context;
 
     try {
-        const core = await engine.importJs('_system/scripts/lib/core.js');
-        const ui = await engine.importJs('_system/scripts/lib/ui.js');
-        const monstersLib = await engine.importJs('_system/scripts/lib/monsters.js');
 
         const file = core.getActiveFile(app);
         const fm = core.getFrontmatter(app, file);

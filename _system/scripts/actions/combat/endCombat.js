@@ -3,13 +3,14 @@
  * Ends an active combat encounter and logs final state
  */
 
+import * as core from '../../lib/core.js';
+import * as ui from '../../lib/ui.js';
+import * as combat from '../../lib/combat.js';
+
 export async function run(context) {
     const { app, quickAddApi } = context;
 
     try {
-        const core = await engine.importJs('_system/scripts/lib/core.js');
-        const ui = await engine.importJs('_system/scripts/lib/ui.js');
-        const combat = await engine.importJs('_system/scripts/lib/combat.js');
 
         const file = core.getActiveFile(app);
         const fm = core.getFrontmatter(app, file);
