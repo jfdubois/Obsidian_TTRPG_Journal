@@ -3,12 +3,12 @@
  * Creates a new world with folder structure and World.md file
  */
 
+import * as ui from '../../lib/ui.js';
+
 export async function run(context) {
     const { app, quickAddApi } = context;
 
     try {
-        const ui = await engine.importJs('_system/scripts/lib/ui.js');
-
         // Prompt for world name
         const worldName = await ui.promptForText(quickAddApi, "Enter World name:");
         if (!worldName) return;
