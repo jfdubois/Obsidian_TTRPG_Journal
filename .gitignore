@@ -17,3 +17,4 @@ _system/srd/*
 !_system/srd/sources.md
 **/.git/
 .claude
+CLAUDE.local.md
