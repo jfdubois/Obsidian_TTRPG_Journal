@@ -1,32 +1,24 @@
-/**
- * Enable Combat Action
- * Transitions a planned encounter to active combat
- */
-
 import * as core from '../../lib/core.js';
 import * as ui from '../../lib/ui.js';
 import * as combat from '../../lib/combat.js';
 import * as monsters from '../../lib/monsters.js';
+import { NOTE_TYPES, ENCOUNTER_STATUSES } from '../../lib/constants.js';
 
 export async function run(context) {
     const { app } = context;
 
     try {
-
         const file = core.getActiveFile(app);
         const fm = core.getFrontmatter(app, file);
-        core.requireNoteType(fm, 'encounter');
+        core.requireNoteType(fm, NOTE_TYPES.ENCOUNTER);
+        core.requireNotCompleted(fm, "start combat");
 
-        if (fm.status === "completed") {
-            throw new Error("Cannot start encounter when status is completed");
-        }
-
-        if (fm.status === "inCombat") {
+        if (fm.status === ENCOUNTER_STATUSES.IN_COMBAT) {
             ui.notifyWarning("Combat already in progress!");
             return;
         }
 
-        core.requireStatus(fm, ['planned']);
+        core.requireStatus(fm, [ENCOUNTER_STATUSES.PLANNED]);
 
         const monsterDataMap = await monsters.loadMonsterDataFromSRD(app, fm.monsters || []);
 
@@ -50,21 +42,19 @@ export async function run(context) {
 
         const sortedInitiatives = combat.sortInitiatives(initiativeData);
 
-        await core.updateFrontmatter(app, file, fm => {
-            fm.status = "inCombat";
-            fm.round = fm.round || 1;
-            fm.currentTurn = 0;
-            fm.initiatives = sortedInitiatives;
+        await core.updateFrontmatter(app, file, (frontmatter) => {
+            frontmatter.status = ENCOUNTER_STATUSES.IN_COMBAT;
+            frontmatter.round = frontmatter.round || 1;
+            frontmatter.currentTurn = 0;
+            frontmatter.initiatives = sortedInitiatives;
         });
 
-        setTimeout(() => {
-            app.workspace.trigger('dataview:refresh-views');
-        }, 200);
+        await combat.logCombatAction(app, file, 1, 'round', { round: 1 });
 
+        ui.refreshDataview(app);
         ui.notifySuccess("Combat started!");
 
     } catch (error) {
-        console.error("enableCombat error:", error);
-        new Notice(`Error: ${error.message}`);
+        core.handleActionError("enableCombat", error);
     }
 }

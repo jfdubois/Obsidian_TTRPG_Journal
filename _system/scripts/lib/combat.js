@@ -6,11 +6,29 @@
 import { D20_SIDES, ALPHABET_LENGTH } from './constants.js';
 import { stripWikiLinks } from './core.js';
 
+/**
+ * Roll initiative with DEX modifier
+ *
+ * @param {string} dexModString - DEX modifier as string (e.g., "+3", "-1")
+ * @returns {number} Initiative roll result
+ *
+ * @example
+ * rollInitiative("+3") // Returns 1d20+3
+ */
 export function rollInitiative(dexModString) {
     const mod = dexModString?.match(/([+-]?\d+)/);
     return Math.floor(Math.random() * D20_SIDES) + 1 + (mod ? parseInt(mod[1]) : 0);
 }
 
+/**
+ * Parse hit dice string into components
+ *
+ * @param {string} hpString - HP formula string (e.g., "(2d8+4)")
+ * @returns {{num: number, size: number, op: string, mod: number}|null} Parsed dice formula or null
+ *
+ * @example
+ * parseHitDice("(2d8+4)") // Returns {num: 2, size: 8, op: '+', mod: 4}
+ */
 export function parseHitDice(hpString) {
     const match = hpString?.match(/\((\d+)d(\d+)(?:\s*([+-])\s*(\d+))?\)/);
     return match ? {
@@ -23,6 +41,13 @@ export function parseHitDice(hpString) {
 
 export function rollHitPoints(dice, mode) {
     if (!dice) return 0;
+    if (typeof dice.num !== 'number' || typeof dice.size !== 'number') {
+        throw new Error("Invalid dice formula: num and size must be numbers");
+    }
+    if (dice.num < 0 || dice.size < 1) {
+        throw new Error("Invalid dice formula: num must be >= 0, size must be >= 1");
+    }
+
     let total = 0;
 
     if (mode === "low") {
@@ -51,6 +76,14 @@ export function generateLabel(index, isGroup) {
 }
 
 export function getHealthStatus(currentHp, maxHp) {
+    if (typeof currentHp !== 'number' || typeof maxHp !== 'number') {
+        throw new Error("Invalid HP values: must be numbers");
+    }
+    if (maxHp <= 0) {
+        throw new Error("Max HP must be positive");
+    }
+    if (currentHp < 0) currentHp = 0;
+
     if (currentHp <= 0) return "dead";
     const ratio = currentHp / maxHp;
     if (ratio >= 1) return "healthy";
@@ -61,6 +94,13 @@ export function getHealthStatus(currentHp, maxHp) {
 }
 
 export function applyDamageToTarget(target, amount) {
+    if (!target || typeof target !== 'object') {
+        throw new Error("Invalid target: must be an object");
+    }
+    if (typeof amount !== 'number' || amount < 0) {
+        throw new Error("Damage amount must be a non-negative number");
+    }
+
     const oldHp = target.currentHp;
     const newHp = Math.max(0, target.currentHp - amount);
     target.currentHp = newHp;
@@ -69,6 +109,13 @@ export function applyDamageToTarget(target, amount) {
 }
 
 export function applyHealingToTarget(target, amount) {
+    if (!target || typeof target !== 'object') {
+        throw new Error("Invalid target: must be an object");
+    }
+    if (typeof amount !== 'number' || amount < 0) {
+        throw new Error("Healing amount must be a non-negative number");
+    }
+
     const oldHp = target.currentHp;
     const newHp = Math.min(target.maxHp, target.currentHp + amount);
     target.currentHp = newHp;
@@ -77,6 +124,9 @@ export function applyHealingToTarget(target, amount) {
 }
 
 export function sortInitiatives(initiatives) {
+    if (!Array.isArray(initiatives)) {
+        throw new Error("Initiatives must be an array");
+    }
     return [...initiatives].sort((a, b) => (b.initiative || 0) - (a.initiative || 0));
 }
 

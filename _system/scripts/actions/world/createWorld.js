@@ -1,39 +1,25 @@
-/**
- * Create World Action
- * Creates a new world with folder structure and World.md file
- */
-
+import * as core from '../../lib/core.js';
 import * as ui from '../../lib/ui.js';
+import { PATHS } from '../../lib/constants.js';
 
 export async function run(context) {
     const { app, quickAddApi } = context;
 
     try {
-        // Prompt for world name
         const worldName = await ui.promptForText(quickAddApi, "Enter World name:");
         if (!worldName) return;
 
-        // Prompt for role (player or dm)
         const roleOptions = [
             { label: "Player", value: "player" },
             { label: "Dungeon Master", value: "dm" }
         ];
-        const selectedRole = await ui.selectFromList(
-            quickAddApi,
-            roleOptions.map(r => r.label),
-            roleOptions,
-            "Select your role in this world:"
-        );
-        if (!selectedRole) return; // User cancelled
+        const role = await ui.selectOption(quickAddApi, roleOptions, "Select your role in this world:");
+        if (!role) return;
 
-        const role = selectedRole.value;
-
-        // Create the folder structure
-        const folderPath = "Worlds/" + worldName;
+        const folderPath = `${PATHS.WORLDS_FOLDER}/${worldName}`;
         await app.vault.createFolder(folderPath).catch(() => {});
-        await app.vault.createFolder(folderPath + "/Ressources").catch(() => {});
+        await app.vault.createFolder(`${folderPath}/Ressources`).catch(() => {});
 
-        // Build the World.md content
         let fileContent = buildWorldFrontmatter(worldName, role);
         fileContent += buildWorldHeader(worldName);
         fileContent += buildPlayersSection();
@@ -41,24 +27,19 @@ export async function run(context) {
         fileContent += buildSessionsSection(folderPath);
         fileContent += buildWorldKnowledgeSection(worldName);
 
-        // Add DM-specific sections
         if (role === "dm") {
             fileContent += buildDmEncountersSection(folderPath);
         }
 
-        // Create the World.md file
         const filePath = `${folderPath}/World.md`;
         await app.vault.create(filePath, fileContent);
 
-        // Open the file
-        const file = app.vault.getAbstractFileByPath(filePath);
-        await app.workspace.getLeaf().openFile(file);
+        await core.openFile(app, filePath, false);
 
         ui.notifySuccess(`World "${worldName}" created successfully!`);
 
     } catch (error) {
-        console.error("createWorld error:", error);
-        new Notice(`Error: ${error.message}`);
+        core.handleActionError("createWorld", error);
     }
 }
 
@@ -88,21 +69,18 @@ function buildPlayersSection() {
 function buildActionsSection(role) {
     let content = `### Actions\n\n`;
 
-    // Button: create-session
     content += "```button\n";
     content += "name Add Session\n";
     content += "type command\n";
     content += "action QuickAdd: create-session\n";
     content += "```\n";
 
-    // Button: add-entity
     content += "```button\n";
     content += "name Add Entity\n";
     content += "type command\n";
     content += "action Templater: Create new-entity\n";
     content += "```\n";
 
-    // DM - Button: create-encounter
     if (role === "dm") {
         content += "```button\n";
         content += "name Create Encounter\n";

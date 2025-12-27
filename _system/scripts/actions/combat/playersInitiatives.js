@@ -1,20 +1,15 @@
-/**
- * Players Initiatives Action
- * Add or update player character initiatives using ModalForms
- */
-
 import * as core from '../../lib/core.js';
 import * as ui from '../../lib/ui.js';
 import * as combat from '../../lib/combat.js';
+import { NOTE_TYPES } from '../../lib/constants.js';
 
 export async function run(context) {
     const { app } = context;
 
     try {
-
         const file = core.getActiveFile(app);
         const fm = core.getFrontmatter(app, file);
-        core.requireNoteType(fm, 'encounter');
+        core.requireNoteType(fm, NOTE_TYPES.ENCOUNTER);
 
         const world = fm.world;
         if (!world) {
@@ -56,21 +51,21 @@ export async function run(context) {
             return;
         }
 
-        await core.updateFrontmatter(app, file, fm => {
-            const currentInitiatives = fm.initiatives || [];
+        await core.updateFrontmatter(app, file, (frontmatter) => {
+            const currentInitiatives = frontmatter.initiatives || [];
 
             const preserved = currentInitiatives.filter(p => {
                 const cleanName = p.name?.replace?.(/\[\[(.*?)\]\]/g, '$1') || '';
                 return !updates.has(cleanName);
             });
 
-            fm.initiatives = combat.sortInitiatives([...preserved, ...Array.from(updates.values())]);
+            frontmatter.initiatives = combat.sortInitiatives([...preserved, ...Array.from(updates.values())]);
         });
 
+        ui.refreshDataview(app);
         ui.notifySuccess(`Updated ${updates.size} initiative(s)!`);
 
     } catch (error) {
-        console.error("playersInitiatives error:", error);
-        new Notice(`Error: ${error.message}`);
+        core.handleActionError("playersInitiatives", error);
     }
 }

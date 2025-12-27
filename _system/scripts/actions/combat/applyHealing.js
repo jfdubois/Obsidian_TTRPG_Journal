@@ -1,59 +1,45 @@
-/**
- * Apply Healing Action
- * Heals a target in combat
- */
-
 import * as core from '../../lib/core.js';
 import * as ui from '../../lib/ui.js';
 import * as combat from '../../lib/combat.js';
+import { ENCOUNTER_STATUSES } from '../../lib/constants.js';
 
 export async function run(context) {
     const { app, quickAddApi } = context;
 
-    try{
+    try {
+        const { file, fm } = core.validateEncounterContext(app, [ENCOUNTER_STATUSES.IN_COMBAT]);
+        const initiatives = core.requireInitiatives(fm);
 
-        const file = core.getActiveFile(app);
-        const fm = core.getFrontmatter(app, file);
-        core.requireNoteType(fm, 'encounter');
-        core.requireStatus(fm, ['inCombat']);
-
-        const initiatives = fm.initiatives || [];
-
+        const source = await ui.promptForSource(quickAddApi, initiatives, "healing");
         const target = await ui.promptForTarget(quickAddApi, initiatives, "Select target to heal:");
         if (!target) return;
 
-        const { displayChoices: sourceChoices, values: sourceValues } = ui.buildSourceChoices(initiatives);
-        const source = await ui.selectFromList(quickAddApi, sourceChoices, sourceValues, "Who is healing?");
-        if (!source) return;
+        const healing = await ui.promptForPositiveNumber(quickAddApi, "Healing amount:", 1);
+        if (!healing) return;
 
-        const healAmount = await ui.promptForNumber(quickAddApi, "Heal amount:");
-        if (!healAmount || healAmount < 1) {
-            ui.notifyWarning("Invalid amount!");
-            return;
-        }
+        const result = combat.applyHealingToTarget(target, healing);
 
-        const { oldHp, newHp } = combat.applyHealingToTarget(target, healAmount);
-
-        await core.updateFrontmatter(app, file, fm => {
-            fm.initiatives = initiatives;
+        await core.updateFrontmatter(app, file, (frontmatter) => {
+            const initiativeEntry = frontmatter.initiatives.find(i => i.label === target.label);
+            if (initiativeEntry) {
+                initiativeEntry.currentHp = result.newHp;
+                initiativeEntry.status = result.newStatus;
+            }
         });
 
-        let content = await core.readFile(app, file);
-        const logEntry = combat.formatLogEntry(fm.round || 1, 'heal', {
+        await combat.logCombatAction(app, file, fm.round || 1, 'heal', {
             source: source,
-            target: target.name,
-            amount: healAmount,
-            oldHp: oldHp,
-            newHp: newHp,
+            target: target.label || core.stripWikiLinks(target.name),
+            amount: healing,
+            oldHp: result.oldHp,
+            newHp: result.newHp,
             maxHp: target.maxHp
         });
-        content = combat.appendToLog(content, logEntry);
-        await core.writeFile(app, file, content);
 
-        ui.notifySuccess(`${target.name} healed ${healAmount} HP!`);
+        ui.refreshDataview(app);
+        ui.notifySuccess(`${target.label || target.name} healed for ${healing} HP!`);
 
     } catch (error) {
-        console.error("applyHealing error:", error);
-        new Notice(`Error: ${error.message}`);
+        core.handleActionError("applyHealing", error);
     }
 }

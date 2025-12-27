@@ -1,8 +1,15 @@
-/**
- * Core utilities for Obsidian scripts
- * Cross-cutting concerns: frontmatter, validation, file access
- */
+import { NOTE_TYPES, ENCOUNTER_STATUSES } from './constants.js';
 
+/**
+ * Get the currently active file in Obsidian
+ *
+ * @param {Object} app - Obsidian app instance
+ * @returns {Object} The active file
+ * @throws {Error} If no file is currently active
+ *
+ * @example
+ * const file = getActiveFile(app);
+ */
 export function getActiveFile(app) {
     const file = app.workspace.getActiveFile();
     if (!file) {
@@ -11,6 +18,17 @@ export function getActiveFile(app) {
     return file;
 }
 
+/**
+ * Get frontmatter from a file
+ *
+ * @param {Object} app - Obsidian app instance
+ * @param {Object} file - File object to read frontmatter from
+ * @returns {Object} Frontmatter object
+ * @throws {Error} If file has no frontmatter
+ *
+ * @example
+ * const fm = getFrontmatter(app, file);
+ */
 export function getFrontmatter(app, file) {
     const cache = app.metadataCache.getFileCache(file);
     if (!cache?.frontmatter) {
@@ -19,22 +37,64 @@ export function getFrontmatter(app, file) {
     return cache.frontmatter;
 }
 
+/**
+ * Update frontmatter using a processor function
+ *
+ * @param {Object} app - Obsidian app instance
+ * @param {Object} file - File to update
+ * @param {Function} updateFn - Function that receives and modifies frontmatter
+ * @returns {Promise<void>}
+ *
+ * @example
+ * await updateFrontmatter(app, file, (fm) => { fm.status = 'active'; });
+ */
 export async function updateFrontmatter(app, file, updateFn) {
     await app.fileManager.processFrontMatter(file, updateFn);
 }
 
+/**
+ * Validate note type matches expected type
+ *
+ * @param {Object} fm - Frontmatter object
+ * @param {string} expectedType - Expected note type value
+ * @throws {Error} If type doesn't match
+ *
+ * @example
+ * requireNoteType(fm, NOTE_TYPES.ENCOUNTER);
+ */
 export function requireNoteType(fm, expectedType) {
     if (fm.type !== expectedType) {
         throw new Error(`Note type is '${fm.type}', expected '${expectedType}'`);
     }
 }
 
+/**
+ * Validate status is in allowed list
+ *
+ * @param {Object} fm - Frontmatter object
+ * @param {Array<string>} allowedStatuses - List of allowed status values
+ * @throws {Error} If status not in allowed list
+ *
+ * @example
+ * requireStatus(fm, ['planned', 'inCombat']);
+ */
 export function requireStatus(fm, allowedStatuses) {
     if (!allowedStatuses.includes(fm.status)) {
         throw new Error(`Status '${fm.status}' not allowed. Expected: ${allowedStatuses.join(', ')}`);
     }
 }
 
+/**
+ * Get file by path
+ *
+ * @param {Object} app - Obsidian app instance
+ * @param {string} path - File path relative to vault root
+ * @returns {Object} File object
+ * @throws {Error} If file not found
+ *
+ * @example
+ * const file = getFileByPath(app, 'Worlds/MyWorld/World.md');
+ */
 export function getFileByPath(app, path) {
     const file = app.vault.getAbstractFileByPath(path);
     if (!file) {
@@ -43,19 +103,46 @@ export function getFileByPath(app, path) {
     return file;
 }
 
+/**
+ * Read file contents
+ *
+ * @param {Object} app - Obsidian app instance
+ * @param {Object} file - File to read
+ * @returns {Promise<string>} File contents
+ *
+ * @example
+ * const content = await readFile(app, file);
+ */
 export async function readFile(app, file) {
     return await app.vault.read(file);
 }
 
+/**
+ * Write content to file
+ *
+ * @param {Object} app - Obsidian app instance
+ * @param {Object} file - File to write to
+ * @param {string} content - Content to write
+ * @returns {Promise<void>}
+ *
+ * @example
+ * await writeFile(app, file, 'New content');
+ */
 export async function writeFile(app, file, content) {
     await app.vault.modify(file, content);
 }
 
-import { NOTE_TYPES, ENCOUNTER_STATUSES } from './constants.js';
-
 /**
  * Validate and get encounter context
- * Eliminates 7 duplications across action scripts
+ * Combines validation and context retrieval to eliminate duplication
+ *
+ * @param {Object} app - Obsidian app instance
+ * @param {Array<string>|null} requiredStatuses - Required status values (optional)
+ * @returns {{file: Object, fm: Object}} File and frontmatter objects
+ * @throws {Error} If validation fails
+ *
+ * @example
+ * const { file, fm } = validateEncounterContext(app, [ENCOUNTER_STATUSES.IN_COMBAT]);
  */
 export function validateEncounterContext(app, requiredStatuses = null) {
     const file = getActiveFile(app);
@@ -76,8 +163,14 @@ export function validateEncounterContext(app, requiredStatuses = null) {
 }
 
 /**
- * Require non-completed encounter
- * Eliminates 2 duplications
+ * Require encounter is not completed
+ *
+ * @param {Object} fm - Frontmatter object
+ * @param {string} actionName - Name of action being performed (for error message)
+ * @throws {Error} If encounter is completed
+ *
+ * @example
+ * requireNotCompleted(fm, 'add monsters');
  */
 export function requireNotCompleted(fm, actionName = "this action") {
     if (fm.status === ENCOUNTER_STATUSES.COMPLETED) {
@@ -87,7 +180,13 @@ export function requireNotCompleted(fm, actionName = "this action") {
 
 /**
  * Get and validate initiatives array
- * Eliminates 3 duplications
+ *
+ * @param {Object} fm - Frontmatter object
+ * @returns {Array} Initiatives array
+ * @throws {Error} If no initiatives exist
+ *
+ * @example
+ * const initiatives = requireInitiatives(fm);
  */
 export function requireInitiatives(fm) {
     const initiatives = fm.initiatives || [];
@@ -98,8 +197,13 @@ export function requireInitiatives(fm) {
 }
 
 /**
- * Standardized error handler for actions
- * Eliminates 8 duplications across all action scripts
+ * Standardized error handler for action scripts
+ *
+ * @param {string} actionName - Name of the action that errored
+ * @param {Error} error - Error object
+ *
+ * @example
+ * catch (error) { handleActionError("applyDamage", error); }
  */
 export function handleActionError(actionName, error) {
     console.error(`${actionName} error:`, error);
@@ -108,7 +212,15 @@ export function handleActionError(actionName, error) {
 
 /**
  * Open file in workspace
- * Eliminates 2 duplications
+ *
+ * @param {Object} app - Obsidian app instance
+ * @param {string} filePath - Path to file to open
+ * @param {boolean} newTab - Whether to open in new tab (default: false)
+ * @returns {Promise<void>}
+ * @throws {Error} If file not found
+ *
+ * @example
+ * await openFile(app, 'Worlds/MyWorld/E0001.md', true);
  */
 export async function openFile(app, filePath, newTab = false) {
     const file = app.vault.getAbstractFileByPath(filePath);
@@ -121,7 +233,12 @@ export async function openFile(app, filePath, newTab = false) {
 
 /**
  * Strip WikiLink brackets from text
- * Eliminates 7+ duplications
+ *
+ * @param {string} text - Text containing WikiLinks
+ * @returns {string} Text with brackets removed
+ *
+ * @example
+ * stripWikiLinks('[[Monster]]') // Returns 'Monster'
  */
 export function stripWikiLinks(text) {
     if (!text) return '';
