@@ -19,25 +19,38 @@ export async function run(context) {
 
         const result = combat.applyHealingToTarget(target, healing);
 
-        await core.updateFrontmatter(app, file, (frontmatter) => {
-            const initiativeEntry = frontmatter.initiatives.find(i => i.label === target.label);
-            if (initiativeEntry) {
-                initiativeEntry.currentHp = result.newHp;
-                initiativeEntry.status = result.newStatus;
-            }
-        });
+        if (result.skipped) {
+            await combat.logCombatAction(app, file, fm.round || 1, 'heal', {
+                source: source,
+                target: target.label || core.stripWikiLinks(target.name),
+                amount: healing,
+                oldHp: undefined,
+                newHp: undefined,
+                maxHp: undefined
+            });
+            ui.refreshDataview(app);
+            ui.notifyWarning(`${target.label || target.name} has no HP tracked - healing not applied`);
+        } else {
+            await core.updateFrontmatter(app, file, (frontmatter) => {
+                const initiativeEntry = frontmatter.initiatives.find(i => i.label === target.label);
+                if (initiativeEntry) {
+                    initiativeEntry.currentHp = result.newHp;
+                    initiativeEntry.status = result.newStatus;
+                }
+            });
 
-        await combat.logCombatAction(app, file, fm.round || 1, 'heal', {
-            source: source,
-            target: target.label || core.stripWikiLinks(target.name),
-            amount: healing,
-            oldHp: result.oldHp,
-            newHp: result.newHp,
-            maxHp: target.maxHp
-        });
+            await combat.logCombatAction(app, file, fm.round || 1, 'heal', {
+                source: source,
+                target: target.label || core.stripWikiLinks(target.name),
+                amount: healing,
+                oldHp: result.oldHp,
+                newHp: result.newHp,
+                maxHp: target.maxHp
+            });
 
-        ui.refreshDataview(app);
-        ui.notifySuccess(`${target.label || target.name} healed for ${healing} HP!`);
+            ui.refreshDataview(app);
+            ui.notifySuccess(`${target.label || target.name} healed for ${healing} HP!`);
+        }
 
     } catch (error) {
         core.handleActionError("applyHealing", error);

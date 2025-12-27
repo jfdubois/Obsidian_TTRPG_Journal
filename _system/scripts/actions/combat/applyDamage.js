@@ -24,26 +24,40 @@ export async function run(context) {
 
         const result = combat.applyDamageToTarget(target, damageAmount);
 
-        await core.updateFrontmatter(app, file, (frontmatter) => {
-            const initiativeEntry = frontmatter.initiatives.find(i => i.label === target.label);
-            if (initiativeEntry) {
-                initiativeEntry.currentHp = result.newHp;
-                initiativeEntry.status = result.newStatus;
-            }
-        });
+        if (result.skipped) {
+            await combat.logCombatAction(app, file, fm.round || 1, 'damage', {
+                source: source,
+                target: target.label || core.stripWikiLinks(target.name),
+                amount: damageAmount,
+                damageType: damageType,
+                oldHp: undefined,
+                newHp: undefined,
+                maxHp: undefined
+            });
+            ui.refreshDataview(app);
+            ui.notifyWarning(`${target.label || target.name} has no HP tracked - damage not applied`);
+        } else {
+            await core.updateFrontmatter(app, file, (frontmatter) => {
+                const initiativeEntry = frontmatter.initiatives.find(i => i.label === target.label);
+                if (initiativeEntry) {
+                    initiativeEntry.currentHp = result.newHp;
+                    initiativeEntry.status = result.newStatus;
+                }
+            });
 
-        await combat.logCombatAction(app, file, fm.round || 1, 'damage', {
-            source: source,
-            target: target.label || core.stripWikiLinks(target.name),
-            amount: damageAmount,
-            damageType: damageType,
-            oldHp: result.oldHp,
-            newHp: result.newHp,
-            maxHp: target.maxHp
-        });
+            await combat.logCombatAction(app, file, fm.round || 1, 'damage', {
+                source: source,
+                target: target.label || core.stripWikiLinks(target.name),
+                amount: damageAmount,
+                damageType: damageType,
+                oldHp: result.oldHp,
+                newHp: result.newHp,
+                maxHp: target.maxHp
+            });
 
-        ui.refreshDataview(app);
-        ui.notifySuccess(`${target.label || target.name} takes ${damageAmount} ${damageType} damage!`);
+            ui.refreshDataview(app);
+            ui.notifySuccess(`${target.label || target.name} takes ${damageAmount} ${damageType} damage!`);
+        }
 
     } catch (error) {
         core.handleActionError("applyDamage", error);

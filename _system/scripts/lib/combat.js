@@ -76,6 +76,9 @@ export function generateLabel(index, isGroup) {
 }
 
 export function getHealthStatus(currentHp, maxHp) {
+    if (currentHp === undefined || maxHp === undefined) {
+        return "unknown";
+    }
     if (typeof currentHp !== 'number' || typeof maxHp !== 'number') {
         throw new Error("Invalid HP values: must be numbers");
     }
@@ -101,6 +104,10 @@ export function applyDamageToTarget(target, amount) {
         throw new Error("Damage amount must be a non-negative number");
     }
 
+    if (target.currentHp === undefined || target.maxHp === undefined) {
+        return { skipped: true, reason: "no-hp", oldHp: undefined, newHp: undefined, newStatus: "unknown" };
+    }
+
     const oldHp = target.currentHp;
     const newHp = Math.max(0, target.currentHp - amount);
     target.currentHp = newHp;
@@ -114,6 +121,10 @@ export function applyHealingToTarget(target, amount) {
     }
     if (typeof amount !== 'number' || amount < 0) {
         throw new Error("Healing amount must be a non-negative number");
+    }
+
+    if (target.currentHp === undefined || target.maxHp === undefined) {
+        return { skipped: true, reason: "no-hp", oldHp: undefined, newHp: undefined, newStatus: "unknown" };
     }
 
     const oldHp = target.currentHp;
@@ -160,8 +171,14 @@ export function formatLogEntry(round, action, data) {
 
     switch (action) {
         case 'damage':
+            if (data.oldHp === undefined) {
+                return `- ${timestamp}: ${data.source} dealt ${data.amount} ${data.damageType} damage to ${data.target} (HP not tracked)`;
+            }
             return `- ${timestamp}: ${data.source} dealt ${data.amount} ${data.damageType} damage to ${data.target} (${data.oldHp} -> ${data.newHp}/${data.maxHp})`;
         case 'heal':
+            if (data.oldHp === undefined) {
+                return `- ${timestamp}: ${data.source} healed ${data.target} for ${data.amount} HP (HP not tracked)`;
+            }
             return `- ${timestamp}: ${data.source} healed ${data.target} for ${data.amount} HP (${data.oldHp} -> ${data.newHp}/${data.maxHp})`;
         case 'round':
             return `- **Round ${data.round} begins!**`;
