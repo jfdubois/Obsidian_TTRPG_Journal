@@ -4,6 +4,7 @@
  */
 
 import { parseHitDice, rollHitPoints, rollInitiative, generateLabel } from './combat.js';
+import { PATHS, ABILITY_SCORE_BASE, ABILITY_MOD_DIVISOR, DEFAULT_SPEED, DEFAULT_HP } from './constants.js';
 
 export function parseEnabledSources(content) {
     const enabledSources = [];
@@ -24,10 +25,9 @@ export function parseEnabledSources(content) {
 }
 
 export async function loadBestiaryIndex(app) {
-    const indexPath = "_system/srd/5etools-src/data/bestiary/index.json";
-    const indexFile = app.vault.getAbstractFileByPath(indexPath);
+    const indexFile = app.vault.getAbstractFileByPath(PATHS.SRD_INDEX);
     if (!indexFile) {
-        throw new Error("Bestiary index.json not found");
+        throw new Error("Bestiary index.json not found. Run setup: git clone in _system/srd/");
     }
     return JSON.parse(await app.vault.read(indexFile));
 }
@@ -36,7 +36,7 @@ export async function loadMonstersBySource(app, index, source) {
     const bestiaryFile = index[source];
     if (!bestiaryFile) return [];
 
-    const bestiaryPath = `_system/srd/5etools-src/data/bestiary/${bestiaryFile}`;
+    const bestiaryPath = `${PATHS.SRD_BESTIARY}/${bestiaryFile}`;
     const bestiaryFileObj = app.vault.getAbstractFileByPath(bestiaryPath);
 
     if (!bestiaryFileObj) return [];
@@ -51,7 +51,7 @@ export async function loadMonstersBySource(app, index, source) {
 }
 
 export async function loadAllMonsters(app) {
-    const sourcesFile = app.vault.getAbstractFileByPath("_system/srd/sources.md");
+    const sourcesFile = app.vault.getAbstractFileByPath(PATHS.SRD_SOURCES);
     if (!sourcesFile) {
         throw new Error("sources.md not found in _system/srd/");
     }
@@ -101,8 +101,7 @@ export async function loadMonsterDataFromSRD(app, encounterMonsters) {
 }
 
 export function transformSRDToCombatFormat(srdMonster) {
-    const dexMod = Math.floor((srdMonster.dex - 10) / 2);
-    const dexModString = dexMod >= 0 ? `+${dexMod}` : `${dexMod}`;
+    const dexModString = calculateDexMod(srdMonster.dex || 10);
 
     const hpString = srdMonster.hp
         ? `${srdMonster.hp.average} (${srdMonster.hp.formula})`
@@ -115,7 +114,7 @@ export function transformSRDToCombatFormat(srdMonster) {
         acValue = srdMonster.ac;
     }
 
-    let speedString = "30 ft.";
+    let speedString = DEFAULT_SPEED;
     if (srdMonster.speed) {
         const speeds = [];
         if (srdMonster.speed.walk) speeds.push(`${srdMonster.speed.walk} ft.`);
@@ -138,7 +137,7 @@ export function transformSRDToCombatFormat(srdMonster) {
 }
 
 export function calculateDexMod(dexScore) {
-    const mod = Math.floor((dexScore - 10) / 2);
+    const mod = Math.floor((dexScore - ABILITY_SCORE_BASE) / ABILITY_MOD_DIVISOR);
     return mod >= 0 ? `+${mod}` : `${mod}`;
 }
 
@@ -153,7 +152,7 @@ export function processMonsterToCombat(monsterEntry, monsterData, startingLabelI
         let maxHp;
         if (monsterEntry.hpMode === "default") {
             const hpMatch = monsterData["Hit Points"].match(/^(\d+)/);
-            maxHp = hpMatch ? parseInt(hpMatch[1]) : 10;
+            maxHp = hpMatch ? parseInt(hpMatch[1]) : DEFAULT_HP;
         } else {
             const dice = parseHitDice(monsterData["Hit Points"]);
             maxHp = rollHitPoints(dice, monsterEntry.hpMode);
@@ -171,7 +170,7 @@ export function processMonsterToCombat(monsterEntry, monsterData, startingLabelI
             maxHp: maxHp,
             currentHp: maxHp,
             ac: monsterData["Armor Class"],
-            speed: monsterData["Speed"] || "30 ft.",
+            speed: monsterData["Speed"] || DEFAULT_SPEED,
             status: "healthy"
         });
     }

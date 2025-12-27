@@ -50,3 +50,80 @@ export async function readFile(app, file) {
 export async function writeFile(app, file, content) {
     await app.vault.modify(file, content);
 }
+
+import { NOTE_TYPES, ENCOUNTER_STATUSES } from './constants.js';
+
+/**
+ * Validate and get encounter context
+ * Eliminates 7 duplications across action scripts
+ */
+export function validateEncounterContext(app, requiredStatuses = null) {
+    const file = getActiveFile(app);
+    const fm = getFrontmatter(app, file);
+    requireNoteType(fm, NOTE_TYPES.ENCOUNTER);
+
+    if (requiredStatuses) {
+        if (Array.isArray(requiredStatuses)) {
+            if (!requiredStatuses.includes(fm.status)) {
+                throw new Error(`Encounter must be in status: ${requiredStatuses.join(' or ')}`);
+            }
+        } else {
+            requireStatus(fm, requiredStatuses);
+        }
+    }
+
+    return { file, fm };
+}
+
+/**
+ * Require non-completed encounter
+ * Eliminates 2 duplications
+ */
+export function requireNotCompleted(fm, actionName = "this action") {
+    if (fm.status === ENCOUNTER_STATUSES.COMPLETED) {
+        throw new Error(`Cannot ${actionName} on completed encounter`);
+    }
+}
+
+/**
+ * Get and validate initiatives array
+ * Eliminates 3 duplications
+ */
+export function requireInitiatives(fm) {
+    const initiatives = fm.initiatives || [];
+    if (initiatives.length === 0) {
+        throw new Error("No combatants in initiative");
+    }
+    return initiatives;
+}
+
+/**
+ * Standardized error handler for actions
+ * Eliminates 8 duplications across all action scripts
+ */
+export function handleActionError(actionName, error) {
+    console.error(`${actionName} error:`, error);
+    new Notice(`Error: ${error.message}`);
+}
+
+/**
+ * Open file in workspace
+ * Eliminates 2 duplications
+ */
+export async function openFile(app, filePath, newTab = false) {
+    const file = app.vault.getAbstractFileByPath(filePath);
+    if (!file) {
+        throw new Error(`File not found: ${filePath}`);
+    }
+    const leafType = newTab ? 'tab' : undefined;
+    await app.workspace.getLeaf(leafType).openFile(file);
+}
+
+/**
+ * Strip WikiLink brackets from text
+ * Eliminates 7+ duplications
+ */
+export function stripWikiLinks(text) {
+    if (!text) return '';
+    return text.replace(/\[\[|\]\]/g, '');
+}

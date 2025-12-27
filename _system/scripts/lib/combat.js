@@ -3,9 +3,12 @@
  * Initiative, HP, damage, healing, combat log
  */
 
+import { D20_SIDES, ALPHABET_LENGTH } from './constants.js';
+import { stripWikiLinks } from './core.js';
+
 export function rollInitiative(dexModString) {
     const mod = dexModString?.match(/([+-]?\d+)/);
-    return Math.floor(Math.random() * 20) + 1 + (mod ? parseInt(mod[1]) : 0);
+    return Math.floor(Math.random() * D20_SIDES) + 1 + (mod ? parseInt(mod[1]) : 0);
 }
 
 export function parseHitDice(hpString) {
@@ -41,9 +44,9 @@ export function generateLabel(index, isGroup) {
         return `G${index + 1}`;
     }
     const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const letterIndex = Math.floor(index / 26);
-    const numIndex = (index % 26) + 1;
-    const letter = letterIndex === 0 ? alphabet[index % 26] : alphabet[letterIndex - 1] + alphabet[index % 26];
+    const letterIndex = Math.floor(index / ALPHABET_LENGTH);
+    const numIndex = (index % ALPHABET_LENGTH) + 1;
+    const letter = letterIndex === 0 ? alphabet[index % ALPHABET_LENGTH] : alphabet[letterIndex - 1] + alphabet[index % ALPHABET_LENGTH];
     return `${letter}${numIndex}`;
 }
 
@@ -80,7 +83,7 @@ export function sortInitiatives(initiatives) {
 export function findTargetByLabel(initiatives, identifier) {
     return initiatives.find(i =>
         i.label === identifier ||
-        (i.name && i.name.replace(/\[\[|\]\]/g, '') === identifier)
+        stripWikiLinks(i.name) === identifier
     );
 }
 
@@ -125,4 +128,38 @@ export function appendToLog(content, entry) {
     } else {
         return content + `\n\n## Combat Log\n${entry}\n`;
     }
+}
+
+/**
+ * Log combat action with automatic file read/write
+ * Eliminates 4 duplications
+ */
+export async function logCombatAction(app, file, round, actionType, data) {
+    let content = await app.vault.read(file);
+    const logEntry = formatLogEntry(round, actionType, data);
+    content = appendToLog(content, logEntry);
+    await app.vault.cachedRead(file);
+    await app.vault.modify(file, content);
+}
+
+/**
+ * Consolidated HP modification
+ * Eliminates duplication between applyDamage and applyHealing
+ */
+export function modifyHP(target, delta, operation = 'damage') {
+    const oldHp = target.currentHp;
+
+    let newHp;
+    if (operation === 'damage') {
+        newHp = Math.max(0, target.currentHp - delta);
+    } else if (operation === 'heal') {
+        newHp = Math.min(target.maxHp, target.currentHp + delta);
+    } else {
+        throw new Error(`Invalid operation: ${operation}`);
+    }
+
+    target.currentHp = newHp;
+    target.status = getHealthStatus(newHp, target.maxHp);
+
+    return { oldHp, newHp, newStatus: target.status };
 }
