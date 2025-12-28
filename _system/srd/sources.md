@@ -2,11 +2,17 @@
 
 This file defines which SRD sources are enabled for monster selection in encounters.
 
-## Core Rulebooks
+## 2014 Core Rulebooks
 
 - **MM**: `enabled: true` - Monster Manual - Core monster collection
 - **DMG**: `enabled: true` - Dungeon Master's Guide - Additional monsters and NPCs
 - **PHB**: `enabled: true` - Player's Handbook - Basic monsters and NPCs
+
+## 2024 Core Rulebooks
+
+- **XMM**: `enabled: true` - Monster Manual - Core monster collection
+- **XDMG**: `enabled: true` - Dungeon Master's Guide - Additional monsters and NPCs
+- **XPHB**: `enabled: true` - Player's Handbook - Basic monsters and NPCs
 
 ## Adventure Modules
 

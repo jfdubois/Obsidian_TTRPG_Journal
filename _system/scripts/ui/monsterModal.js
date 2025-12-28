@@ -1,3 +1,133 @@
+const CR_TO_XP = {
+    '0': 0, '10': 0,
+    '1/8': 25,
+    '1/4': 50,
+    '1/2': 100,
+    '1': 200,
+    '2': 450,
+    '3': 700,
+    '4': 1100,
+    '5': 1800,
+    '6': 2300,
+    '7': 2900,
+    '8': 3900,
+    '9': 5000,
+    '10': 5900,
+    '11': 7200,
+    '12': 8400,
+    '13': 10000,
+    '14': 11500,
+    '15': 13000,
+    '16': 15000,
+    '17': 18000,
+    '18': 20000,
+    '19': 22000,
+    '20': 25000,
+    '21': 33000,
+    '22': 41000,
+    '23': 50000,
+    '24': 62000,
+    '25': 75000,
+    '26': 90000,
+    '27': 105000,
+    '28': 120000,
+    '29': 135000,
+    '30': 155000
+};
+
+function parseCR(cr) {
+    if (typeof cr === 'number') return cr;
+    if (cr === '0') return 0;
+    if (cr.includes('/')) {
+        const [num, denom] = cr.split('/').map(Number);
+        return num / denom;
+    }
+    return parseFloat(cr) || 0;
+}
+
+function calculateXP(cr) {
+    const crStr = String(cr);
+    return CR_TO_XP[crStr] || 0;
+}
+
+function calculateProficiencyBonus(cr) {
+    const crNum = parseCR(cr);
+    if (crNum <= 4) return 2;
+    if (crNum <= 8) return 3;
+    if (crNum <= 12) return 4;
+    if (crNum <= 16) return 5;
+    if (crNum <= 20) return 6;
+    if (crNum <= 24) return 7;
+    if (crNum <= 28) return 8;
+    return 9;
+}
+
+function formatModifier(score) {
+    if (!score) return '+0';
+    const mod = Math.floor((score - 10) / 2);
+    return mod >= 0 ? `+${mod}` : String(mod);
+}
+
+function parseACValue(ac) {
+    if (!ac) return 'Unknown';
+    if (typeof ac === 'number') return String(ac);
+    if (Array.isArray(ac) && ac.length > 0) {
+        const acObj = ac[0];
+        if (typeof acObj === 'number') return String(acObj);
+        if (acObj.ac) {
+            let display = String(acObj.ac);
+            if (acObj.from && acObj.from.length > 0) {
+                display += ` (${acObj.from.join(', ')})`;
+            }
+            return display;
+        }
+    }
+    return 'Unknown';
+}
+
+function parseSpeedValue(speed) {
+    if (!speed) return 'Unknown';
+    if (typeof speed === 'string') return speed;
+    if (typeof speed === 'object') {
+        return Object.entries(speed)
+            .map(([type, value]) => {
+                if (typeof value === 'number') return `${type} ${value} ft.`;
+                if (typeof value === 'object' && value.number) {
+                    return `${type} ${value.number} ft.${value.condition ? ` (${value.condition})` : ''}`;
+                }
+                return `${type} ${value}`;
+            })
+            .join(', ');
+    }
+    return 'Unknown';
+}
+
+function escapeHTML(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function formatResistances(resistArray) {
+    if (!resistArray || !Array.isArray(resistArray)) return '';
+
+    const parts = resistArray.map(item => {
+        if (typeof item === 'string') return item;
+        if (typeof item === 'object') {
+            if (item.resist) {
+                const base = Array.isArray(item.resist) ? item.resist.join(', ') : item.resist;
+                if (item.note) return `${base} (${item.note})`;
+                if (item.preNote) return `${item.preNote} ${base}`;
+                return base;
+            }
+            if (item.special) return item.special;
+        }
+        return String(item);
+    });
+
+    return parts.join('; ');
+}
+
 function parseEnabledSources(content) {
     const enabledSources = [];
     const lines = content.split('\n');
@@ -16,11 +146,10 @@ function parseEnabledSources(content) {
     return enabledSources;
 }
 
-export async function showMonsterModal(app, monsterName) {
+async function loadBestiaryData(app, monsterName, preferredSource = null) {
     const sourcesFile = app.vault.getAbstractFileByPath("_system/srd/sources.md");
     if (!sourcesFile) {
-        alert("Error: sources.md not found!");
-        return;
+        throw new Error("sources.md not found");
     }
 
     const sourcesContent = await app.vault.read(sourcesFile);
@@ -28,13 +157,31 @@ export async function showMonsterModal(app, monsterName) {
 
     const indexFile = app.vault.getAbstractFileByPath("_system/srd/5etools-src/data/bestiary/index.json");
     if (!indexFile) {
-        alert("Error: bestiary index.json not found!");
-        return;
+        throw new Error("bestiary index.json not found");
     }
 
     const index = JSON.parse(await app.vault.read(indexFile));
 
-    let monsterData = null;
+    if (preferredSource) {
+        const bestiaryFile = index[preferredSource];
+        if (bestiaryFile) {
+            const bestiaryPath = `_system/srd/5etools-src/data/bestiary/${bestiaryFile}`;
+            const bestiaryFileObj = app.vault.getAbstractFileByPath(bestiaryPath);
+
+            if (bestiaryFileObj) {
+                try {
+                    const bestiaryData = JSON.parse(await app.vault.read(bestiaryFileObj));
+                    if (bestiaryData.monster) {
+                        const monsterData = bestiaryData.monster.find(m => m.name === monsterName && m.source === preferredSource);
+                        if (monsterData) return monsterData;
+                    }
+                } catch (error) {
+                    console.error(`Error loading ${bestiaryPath}:`, error);
+                }
+            }
+        }
+    }
+
     for (const source of enabledSources) {
         const bestiaryFile = index[source];
         if (!bestiaryFile) continue;
@@ -46,8 +193,8 @@ export async function showMonsterModal(app, monsterName) {
             try {
                 const bestiaryData = JSON.parse(await app.vault.read(bestiaryFileObj));
                 if (bestiaryData.monster) {
-                    monsterData = bestiaryData.monster.find(m => m.name === monsterName);
-                    if (monsterData) break;
+                    const monsterData = bestiaryData.monster.find(m => m.name === monsterName);
+                    if (monsterData) return monsterData;
                 }
             } catch (error) {
                 console.error(`Error loading ${bestiaryPath}:`, error);
@@ -55,11 +202,68 @@ export async function showMonsterModal(app, monsterName) {
         }
     }
 
-    if (!monsterData) {
-        alert(`Monster ${monsterName} not found in enabled sources!`);
-        return;
-    }
+    return null;
+}
 
+const fluffCache = {};
+
+async function loadFluffData(app, monsterName, source) {
+    try {
+        const fluffIndexPath = "_system/srd/5etools-src/data/bestiary/fluff-index.json";
+        const fluffIndexFile = app.vault.getAbstractFileByPath(fluffIndexPath);
+
+        if (!fluffIndexFile) {
+            console.warn("Fluff index not found");
+            return null;
+        }
+
+        const fluffIndex = JSON.parse(await app.vault.read(fluffIndexFile));
+        const fluffFile = fluffIndex[source];
+
+        if (!fluffFile) {
+            console.warn(`No fluff file for source: ${source}`);
+            return null;
+        }
+
+        if (!fluffCache[fluffFile]) {
+            const fluffPath = `_system/srd/5etools-src/data/bestiary/${fluffFile}`;
+            const fluffFileObj = app.vault.getAbstractFileByPath(fluffPath);
+
+            if (!fluffFileObj) {
+                console.warn(`Fluff file not found: ${fluffPath}`);
+                return null;
+            }
+
+            const fluffData = JSON.parse(await app.vault.read(fluffFileObj));
+            fluffCache[fluffFile] = fluffData;
+        }
+
+        const fluffData = fluffCache[fluffFile];
+        if (fluffData.monster) {
+            return fluffData.monster.find(m => m.name === monsterName && m.source === source);
+        }
+
+        return null;
+    } catch (error) {
+        console.warn('Failed to load fluff data:', error);
+        return null;
+    }
+}
+
+async function loadMonsterData(app, monsterName, preferredSource = null) {
+    const monsterData = await loadBestiaryData(app, monsterName, preferredSource);
+    if (!monsterData) return null;
+
+    const fluffData = await loadFluffData(app, monsterName, monsterData.source);
+
+    return {
+        ...monsterData,
+        fluff: fluffData,
+        environment: monsterData.environment || fluffData?.environment
+    };
+}
+
+function createModalStructure(monsterData) {
     const modal = document.createElement('div');
     modal.style.position = 'fixed';
     modal.style.top = '0';
@@ -77,12 +281,33 @@ export async function showMonsterModal(app, monsterName) {
     const modalContent = document.createElement('div');
     modalContent.style.backgroundColor = 'var(--background-primary)';
     modalContent.style.borderRadius = '8px';
-    modalContent.style.padding = '20px';
-    modalContent.style.maxWidth = '600px';
+    modalContent.style.width = '700px';
     modalContent.style.maxHeight = '80vh';
-    modalContent.style.overflow = 'auto';
+    modalContent.style.overflow = 'hidden';
     modalContent.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.3)';
-    modalContent.style.position = 'relative';
+    modalContent.style.display = 'flex';
+    modalContent.style.flexDirection = 'column';
+    modalContent.style.fontFamily = 'var(--font-interface)';
+    modalContent.style.fontSize = '14px';
+
+    const header = createHeader(monsterData);
+    const tabContainer = createTabContainer();
+    const contentContainer = document.createElement('div');
+    contentContainer.style.flex = '1';
+    contentContainer.style.overflow = 'auto';
+    contentContainer.style.padding = '20px';
+
+    const statsContent = renderStatsTab(monsterData);
+    const actionsContent = renderActionsTab(monsterData);
+    const infoContent = renderInfoTab(monsterData);
+
+    statsContent.style.display = 'block';
+    actionsContent.style.display = 'none';
+    infoContent.style.display = 'none';
+
+    contentContainer.appendChild(statsContent);
+    contentContainer.appendChild(actionsContent);
+    contentContainer.appendChild(infoContent);
 
     const closeButton = document.createElement('button');
     closeButton.textContent = '×';
@@ -94,239 +319,487 @@ export async function showMonsterModal(app, monsterName) {
     closeButton.style.fontSize = '24px';
     closeButton.style.cursor = 'pointer';
     closeButton.style.color = 'var(--text-muted)';
+    closeButton.style.zIndex = '10';
     closeButton.onclick = () => document.body.removeChild(modal);
 
-    const statTable = document.createElement('table');
-    statTable.style.width = '100%';
-    statTable.style.borderCollapse = 'collapse';
-    statTable.style.fontSize = '0.9em';
-    statTable.style.lineHeight = '1.4';
+    setupTabNavigation(tabContainer, [statsContent, actionsContent, infoContent]);
 
-    const headerRow = statTable.insertRow();
-    headerRow.style.borderBottom = '2px solid var(--text-muted)';
-    const headerCell = headerRow.insertCell();
-    headerCell.colSpan = 6;
-    headerCell.style.textAlign = 'left';
-    headerCell.style.padding = '10px 0';
-
-    const nameDiv = document.createElement('div');
-    nameDiv.style.display = 'flex';
-    nameDiv.style.justifyContent = 'space-between';
-    nameDiv.style.alignItems = 'center';
-
-    const nameH1 = document.createElement('h1');
-    nameH1.textContent = monsterData.name;
-    nameH1.style.margin = '0';
-    nameH1.style.fontSize = '1.5em';
-    nameH1.style.fontWeight = 'bold';
-
-    const sourceDiv = document.createElement('div');
-    sourceDiv.textContent = monsterData.source;
-    sourceDiv.style.fontSize = '0.8em';
-    sourceDiv.style.color = 'var(--text-muted)';
-
-    nameDiv.appendChild(nameH1);
-    nameDiv.appendChild(sourceDiv);
-    headerCell.appendChild(nameDiv);
-
-    const typeRow = statTable.insertRow();
-    const typeCell = typeRow.insertCell();
-    typeCell.colSpan = 6;
-    typeCell.style.padding = '5px 0';
-    typeCell.style.fontStyle = 'italic';
-    typeCell.textContent = `${monsterData.size?.[0] || 'Unknown'} ${monsterData.type || 'Unknown'}, ${monsterData.alignment?.join(', ') || 'Unknown'}`;
-
-    const acRow = statTable.insertRow();
-    const acCell = acRow.insertCell();
-    acCell.colSpan = 3;
-    acCell.style.padding = '5px 0';
-    let acDisplay = 'Unknown';
-    if (monsterData.ac) {
-        if (Array.isArray(monsterData.ac) && monsterData.ac.length > 0) {
-            const acObj = monsterData.ac[0];
-            if (acObj.ac) {
-                acDisplay = acObj.ac;
-                if (acObj.from && acObj.from.length > 0) {
-                    acDisplay += ` (${acObj.from.join(', ')})`;
-                }
-            }
-        } else if (typeof monsterData.ac === 'number') {
-            acDisplay = monsterData.ac;
-        }
-    }
-    acCell.innerHTML = `<strong>AC</strong> ${acDisplay}`;
-
-    const initCell = acRow.insertCell();
-    initCell.colSpan = 3;
-    initCell.style.padding = '5px 0';
-    initCell.innerHTML = `<strong>Initiative</strong> ${monsterData.dex ? Math.floor((monsterData.dex - 10) / 2) >= 0 ? '+' + Math.floor((monsterData.dex - 10) / 2) : Math.floor((monsterData.dex - 10) / 2) : 'Unknown'} (${monsterData.dex || 'Unknown'})`;
-
-    const hpRow = statTable.insertRow();
-    const hpCell = hpRow.insertCell();
-    hpCell.colSpan = 6;
-    hpCell.style.padding = '5px 0';
-    hpCell.innerHTML = `<strong>HP</strong> ${monsterData.hp ? `${monsterData.hp.average} (${monsterData.hp.formula})` : 'Unknown'}`;
-
-    const speedRow = statTable.insertRow();
-    const speedCell = speedRow.insertCell();
-    speedCell.colSpan = 6;
-    speedCell.style.padding = '5px 0';
-    speedCell.innerHTML = `<strong>Speed</strong> ${monsterData.speed ? Object.entries(monsterData.speed).map(([k, v]) => `${k} ${v}`).join(', ') : 'Unknown'}`;
-
-    if (monsterData.str || monsterData.dex || monsterData.con || monsterData.int || monsterData.wis || monsterData.cha) {
-        const abilityRow = statTable.insertRow();
-        const abilityCell = abilityRow.insertCell();
-        abilityCell.colSpan = 6;
-        abilityCell.style.padding = '10px 0';
-
-        const abilityTable = document.createElement('table');
-        abilityTable.style.width = '100%';
-        abilityTable.style.borderCollapse = 'collapse';
-
-        const abilityHeaderRow = abilityTable.insertRow();
-        ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'].forEach(header => {
-            const th = document.createElement('th');
-            th.textContent = header;
-            th.style.padding = '5px';
-            th.style.fontSize = '0.8em';
-            th.style.fontWeight = 'bold';
-            th.style.textAlign = 'center';
-            th.style.borderBottom = '1px solid var(--text-muted)';
-            abilityHeaderRow.appendChild(th);
-        });
-
-        const scoreRow = abilityTable.insertRow();
-        ['str', 'dex', 'con', 'int', 'wis', 'cha'].forEach(ability => {
-            const td = scoreRow.insertCell();
-            const score = monsterData[ability];
-            if (score) {
-                const mod = Math.floor((score - 10) / 2);
-                const modStr = mod >= 0 ? `+${mod}` : mod;
-                td.textContent = `${score} (${modStr})`;
-            } else {
-                td.textContent = '';
-            }
-            td.style.padding = '5px';
-            td.style.textAlign = 'center';
-            td.style.fontWeight = 'bold';
-        });
-
-        const saveRow = abilityTable.insertRow();
-        ['str', 'dex', 'con', 'int', 'wis', 'cha'].forEach(ability => {
-            const td = saveRow.insertCell();
-            const saveValue = monsterData.save && monsterData.save[ability];
-            if (saveValue) {
-                td.textContent = saveValue;
-                td.style.fontWeight = 'bold';
-                td.style.opacity = '0.7';
-            } else {
-                td.textContent = '--';
-                td.style.opacity = '0.5';
-            }
-            td.style.padding = '5px';
-            td.style.textAlign = 'center';
-            td.style.fontSize = '0.9em';
-        });
-
-        abilityCell.appendChild(abilityTable);
-    }
-
-    if (monsterData.skill) {
-        const skillRow = statTable.insertRow();
-        const skillCell = skillRow.insertCell();
-        skillCell.colSpan = 6;
-        skillCell.style.padding = '5px 0';
-        const skills = Object.entries(monsterData.skill).map(([skill, bonus]) => `${skill.charAt(0).toUpperCase() + skill.slice(1)} ${bonus}`).join(', ');
-        skillCell.innerHTML = `<strong>Skills</strong> ${skills}`;
-    }
-
-    if (monsterData.immune || monsterData.resist || monsterData.vulnerable) {
-        if (monsterData.immune) {
-            const immuneRow = statTable.insertRow();
-            const immuneCell = immuneRow.insertCell();
-            immuneCell.colSpan = 6;
-            immuneCell.style.padding = '5px 0';
-            immuneCell.innerHTML = `<strong>Immunities</strong> ${monsterData.immune.join(', ')}`;
-        }
-        if (monsterData.resist) {
-            const resistRow = statTable.insertRow();
-            const resistCell = resistRow.insertCell();
-            resistCell.colSpan = 6;
-            resistCell.style.padding = '5px 0';
-            resistCell.innerHTML = `<strong>Resistances</strong> ${monsterData.resist.join(', ')}`;
-        }
-        if (monsterData.vulnerable) {
-            const vulnRow = statTable.insertRow();
-            const vulnCell = vulnRow.insertCell();
-            vulnCell.colSpan = 6;
-            vulnCell.style.padding = '5px 0';
-            vulnCell.innerHTML = `<strong>Vulnerabilities</strong> ${monsterData.vulnerable.join(', ')}`;
-        }
-    }
-
-    if (monsterData.senses) {
-        const sensesRow = statTable.insertRow();
-        const sensesCell = sensesRow.insertCell();
-        sensesCell.colSpan = 6;
-        sensesCell.style.padding = '5px 0';
-        sensesCell.innerHTML = `<strong>Senses</strong> ${monsterData.senses.join(', ')}`;
-    }
-
-    if (monsterData.languages) {
-        const langRow = statTable.insertRow();
-        const langCell = langRow.insertCell();
-        langCell.colSpan = 6;
-        langCell.style.padding = '5px 0';
-        langCell.innerHTML = `<strong>Languages</strong> ${monsterData.languages.join(', ')}`;
-    }
-
-    const crRow = statTable.insertRow();
-    const crCell = crRow.insertCell();
-    crCell.colSpan = 6;
-    crCell.style.padding = '10px 0';
-    crCell.innerHTML = `<strong>CR</strong> ${monsterData.cr || 'Unknown'}`;
-
-    if (monsterData.action || monsterData.trait) {
-        const actionsRow = statTable.insertRow();
-        const actionsCell = actionsRow.insertCell();
-        actionsCell.colSpan = 6;
-        actionsCell.style.padding = '15px 0 5px 0';
-
-        const actionsTitle = document.createElement('h3');
-        actionsTitle.textContent = 'Actions';
-        actionsTitle.style.margin = '0 0 10px 0';
-        actionsTitle.style.fontSize = '1.1em';
-        actionsCell.appendChild(actionsTitle);
-
-        if (monsterData.trait) {
-            monsterData.trait.forEach(trait => {
-                const traitDiv = document.createElement('div');
-                traitDiv.style.marginBottom = '10px';
-                traitDiv.innerHTML = `<strong>${trait.name}.</strong> ${trait.entries?.join(' ') || 'No description'}`;
-                actionsCell.appendChild(traitDiv);
-            });
-        }
-
-        if (monsterData.action) {
-            monsterData.action.forEach(action => {
-                const actionDiv = document.createElement('div');
-                actionDiv.style.marginBottom = '10px';
-                actionDiv.innerHTML = `<strong>${action.name}.</strong> ${action.entries?.join(' ') || 'No description'}`;
-                actionsCell.appendChild(actionDiv);
-            });
-        }
-    }
-
-    modalContent.appendChild(closeButton);
-    modalContent.appendChild(statTable);
+    header.style.position = 'relative';
+    header.appendChild(closeButton);
+    modalContent.appendChild(header);
+    modalContent.appendChild(tabContainer);
+    modalContent.appendChild(contentContainer);
     modal.appendChild(modalContent);
-    document.body.appendChild(modal);
 
     modal.onclick = (e) => {
         if (e.target === modal) {
             document.body.removeChild(modal);
         }
     };
+
+    document.addEventListener('keydown', function closeOnEsc(e) {
+        if (e.key === 'Escape') {
+            document.body.removeChild(modal);
+            document.removeEventListener('keydown', closeOnEsc);
+        }
+    });
+
+    return modal;
+}
+
+function createHeader(monsterData) {
+    const header = document.createElement('div');
+    header.style.padding = '20px 20px 10px 20px';
+    header.style.borderBottom = `2px solid var(--background-modifier-border)`;
+
+    const nameH1 = document.createElement('h1');
+    nameH1.textContent = monsterData.name;
+    nameH1.style.margin = '0 0 5px 0';
+    nameH1.style.fontSize = '1.5em';
+    nameH1.style.fontWeight = 'bold';
+    nameH1.style.color = 'var(--text-normal)';
+
+    const typeDiv = document.createElement('div');
+    typeDiv.style.fontStyle = 'italic';
+    typeDiv.style.color = 'var(--text-muted)';
+    typeDiv.style.fontSize = '0.95em';
+
+    const size = monsterData.size?.[0] || 'Unknown';
+    const type = monsterData.type?.type || monsterData.type || 'Unknown';
+    const alignment = Array.isArray(monsterData.alignment)
+        ? monsterData.alignment.map(a => a.special || a).join(', ')
+        : monsterData.alignment || 'Unknown';
+
+    typeDiv.textContent = `${size} ${type}, ${alignment}`;
+
+    const sourceDiv = document.createElement('div');
+    sourceDiv.textContent = monsterData.source;
+    sourceDiv.style.fontSize = '0.8em';
+    sourceDiv.style.color = 'var(--text-muted)';
+    sourceDiv.style.marginTop = '5px';
+
+    header.appendChild(nameH1);
+    header.appendChild(typeDiv);
+    header.appendChild(sourceDiv);
+
+    return header;
+}
+
+function createTabContainer() {
+    const tabContainer = document.createElement('div');
+    tabContainer.style.display = 'flex';
+    tabContainer.style.borderBottom = `1px solid var(--background-modifier-border)`;
+    tabContainer.style.backgroundColor = 'var(--background-secondary)';
+
+    const tabNames = ['Stats', 'Actions', 'Info'];
+    const tabs = [];
+
+    tabNames.forEach((name, index) => {
+        const tab = document.createElement('button');
+        tab.textContent = name;
+        tab.style.flex = '1';
+        tab.style.padding = '10px 20px';
+        tab.style.border = 'none';
+        tab.style.backgroundColor = index === 0 ? 'var(--background-primary)' : 'var(--background-secondary)';
+        tab.style.color = 'var(--text-normal)';
+        tab.style.cursor = 'pointer';
+        tab.style.fontSize = '14px';
+        tab.style.fontFamily = 'var(--font-interface)';
+        tab.style.borderBottom = index === 0 ? `2px solid var(--interactive-accent)` : 'none';
+        tab.style.transition = 'background-color 0.2s ease';
+        tab.dataset.tabIndex = index;
+
+        if (index === 0) {
+            tab.classList.add('active');
+        }
+
+        tabContainer.appendChild(tab);
+        tabs.push(tab);
+    });
+
+    tabContainer.tabs = tabs;
+    return tabContainer;
+}
+
+function setupTabNavigation(tabContainer, contentPanels) {
+    tabContainer.tabs.forEach((tab, index) => {
+        tab.onmouseover = () => {
+            if (!tab.classList.contains('active')) {
+                tab.style.backgroundColor = 'var(--background-modifier-hover)';
+            }
+        };
+        tab.onmouseout = () => {
+            if (!tab.classList.contains('active')) {
+                tab.style.backgroundColor = 'var(--background-secondary)';
+            }
+        };
+        tab.onclick = () => {
+            tabContainer.tabs.forEach((t, i) => {
+                t.classList.remove('active');
+                t.style.backgroundColor = 'var(--background-secondary)';
+                t.style.borderBottom = 'none';
+                contentPanels[i].style.display = 'none';
+            });
+
+            tab.classList.add('active');
+            tab.style.backgroundColor = 'var(--background-primary)';
+            tab.style.borderBottom = `2px solid var(--interactive-accent)`;
+            contentPanels[index].style.display = 'block';
+        };
+    });
+}
+
+function renderStatsTab(monsterData) {
+    const container = document.createElement('div');
+    container.className = 'monster-modal-tab-content';
+
+    const acInit = document.createElement('div');
+    acInit.style.display = 'flex';
+    acInit.style.justifyContent = 'space-between';
+    acInit.style.marginBottom = '10px';
+
+    const ac = document.createElement('div');
+    ac.innerHTML = `<strong>AC</strong> ${parseACValue(monsterData.ac)}`;
+
+    const init = document.createElement('div');
+    const dexMod = monsterData.dex ? Math.floor((monsterData.dex - 10) / 2) : 0;
+    let initBonus = dexMod;
+
+    if (monsterData.initiative && monsterData.initiative.proficiency) {
+        const pb = calculateProficiencyBonus(monsterData.cr);
+        const profMult = monsterData.initiative.proficiency;
+        initBonus += pb * profMult;
+    }
+
+    const initMod = initBonus >= 0 ? `+${initBonus}` : String(initBonus);
+    init.innerHTML = `<strong>Initiative</strong> ${initMod} (${monsterData.dex || 'Unknown'})`;
+
+    acInit.appendChild(ac);
+    acInit.appendChild(init);
+
+    const hp = document.createElement('div');
+    hp.style.marginBottom = '10px';
+    hp.innerHTML = `<strong>HP</strong> ${monsterData.hp ? `${monsterData.hp.average} (${monsterData.hp.formula})` : 'Unknown'}`;
+
+    const speed = document.createElement('div');
+    speed.style.marginBottom = '15px';
+    speed.innerHTML = `<strong>Speed</strong> ${parseSpeedValue(monsterData.speed)}`;
+
+    const abilityGrid = createAbilityGrid(monsterData);
+
+    container.appendChild(acInit);
+    container.appendChild(hp);
+    container.appendChild(speed);
+    container.appendChild(abilityGrid);
+
+    if (monsterData.skill && Object.keys(monsterData.skill).length > 0) {
+        const skills = document.createElement('div');
+        skills.style.marginTop = '15px';
+        skills.style.marginBottom = '10px';
+        const skillStr = Object.entries(monsterData.skill)
+            .map(([skill, bonus]) => `${skill.charAt(0).toUpperCase() + skill.slice(1)} ${bonus}`)
+            .join(', ');
+        skills.innerHTML = `<strong>Skills</strong> ${skillStr}`;
+        container.appendChild(skills);
+    }
+
+    const resistInfo = [
+        { key: 'immune', label: 'Damage Immunities' },
+        { key: 'resist', label: 'Damage Resistances' },
+        { key: 'vulnerable', label: 'Damage Vulnerabilities' },
+        { key: 'conditionImmune', label: 'Condition Immunities' }
+    ];
+
+    resistInfo.forEach(({ key, label }) => {
+        if (monsterData[key]) {
+            const elem = document.createElement('div');
+            elem.style.marginBottom = '10px';
+            const value = Array.isArray(monsterData[key])
+                ? formatResistances(monsterData[key])
+                : String(monsterData[key]);
+            elem.innerHTML = `<strong>${label}</strong> ${value}`;
+            container.appendChild(elem);
+        }
+    });
+
+    if (monsterData.senses) {
+        const senses = document.createElement('div');
+        senses.style.marginBottom = '10px';
+        const senseStr = Array.isArray(monsterData.senses) ? monsterData.senses.join(', ') : monsterData.senses;
+        senses.innerHTML = `<strong>Senses</strong> ${senseStr}`;
+        container.appendChild(senses);
+    }
+
+    if (monsterData.languages) {
+        const languages = document.createElement('div');
+        languages.style.marginBottom = '10px';
+        const langStr = Array.isArray(monsterData.languages) ? monsterData.languages.join(', ') : monsterData.languages;
+        languages.innerHTML = `<strong>Languages</strong> ${langStr || '—'}`;
+        container.appendChild(languages);
+    }
+
+    const cr = document.createElement('div');
+    cr.style.marginTop = '15px';
+    cr.style.marginBottom = '10px';
+    const crValue = monsterData.cr || 'Unknown';
+    const xp = calculateXP(crValue);
+    const pb = calculateProficiencyBonus(crValue);
+    const xpFormatted = xp.toLocaleString();
+    cr.innerHTML = `<strong>CR</strong> ${crValue} (XP ${xpFormatted}, PB +${pb})`;
+    container.appendChild(cr);
+
+    return container;
+}
+
+function createAbilityGrid(monsterData) {
+    const table = document.createElement('table');
+    table.style.width = '100%';
+    table.style.borderCollapse = 'collapse';
+    table.style.marginTop = '15px';
+    table.style.marginBottom = '15px';
+    table.style.border = `1px solid var(--background-modifier-border)`;
+
+    const abilities = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
+    const abilityNames = ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'];
+
+    const headerRow = table.insertRow();
+    abilities.forEach((_, i) => {
+        const th = headerRow.insertCell();
+        th.textContent = abilityNames[i];
+        th.style.padding = '5px';
+        th.style.textAlign = 'center';
+        th.style.fontSize = '0.75em';
+        th.style.fontWeight = 'bold';
+        th.style.textTransform = 'uppercase';
+        th.style.color = 'var(--text-muted)';
+        th.style.borderBottom = `1px solid var(--background-modifier-border)`;
+        if (i > 0) th.style.borderLeft = `1px solid var(--background-modifier-border)`;
+    });
+
+    const scoreRow = table.insertRow();
+    abilities.forEach((ability, i) => {
+        const td = scoreRow.insertCell();
+        const score = monsterData[ability];
+        if (score) {
+            const mod = Math.floor((score - 10) / 2);
+            const modStr = mod >= 0 ? `+${mod}` : String(mod);
+            const scoreDiv = document.createElement('div');
+            scoreDiv.style.fontSize = '1.1em';
+            scoreDiv.style.fontWeight = 'bold';
+            scoreDiv.textContent = String(score);
+            const modDiv = document.createElement('div');
+            modDiv.style.fontSize = '0.9em';
+            modDiv.textContent = modStr;
+            td.appendChild(scoreDiv);
+            td.appendChild(modDiv);
+        } else {
+            td.textContent = '—';
+        }
+        td.style.padding = '5px';
+        td.style.textAlign = 'center';
+        td.style.borderBottom = `1px solid var(--background-modifier-border)`;
+        if (i > 0) td.style.borderLeft = `1px solid var(--background-modifier-border)`;
+    });
+
+    const saveRow = table.insertRow();
+    abilities.forEach((ability, i) => {
+        const td = saveRow.insertCell();
+        const saveValue = monsterData.save && monsterData.save[ability];
+        if (saveValue) {
+            td.textContent = saveValue;
+            td.style.fontWeight = 'bold';
+            td.style.opacity = '1';
+        } else {
+            td.textContent = '—';
+            td.style.opacity = '0.5';
+        }
+        td.style.padding = '5px';
+        td.style.textAlign = 'center';
+        td.style.fontSize = '0.9em';
+        if (i > 0) td.style.borderLeft = `1px solid var(--background-modifier-border)`;
+    });
+
+    return table;
+}
+
+function parseActionEntry(entries) {
+    if (!entries) return 'No description available';
+
+    let text = Array.isArray(entries) ? entries.join(' ') : String(entries);
+
+    text = text.replace(/\{@atk ([^}]+)\}/g, (match, content) => content);
+    text = text.replace(/\{@hit ([^}]+)\}/g, (match, bonus) =>
+        `<span style="color: var(--interactive-accent); font-weight: bold;">+${bonus}</span>`
+    );
+    text = text.replace(/\{@damage ([^}]+)\}/g, (match, dice) =>
+        `<span style="color: var(--text-accent);">${dice}</span>`
+    );
+    text = text.replace(/\{@dice ([^}]+)\}/g, (match, dice) =>
+        `<span style="color: var(--text-accent);">${dice}</span>`
+    );
+    text = text.replace(/\{@dc ([^}]+)\}/g, (match, dc) =>
+        `<span style="color: var(--interactive-accent); font-weight: bold;">DC ${dc}</span>`
+    );
+    text = text.replace(/\{@condition ([^}]+)\}/g, (match, condition) =>
+        `<em>${condition}</em>`
+    );
+    text = text.replace(/\{@(creature|spell|item) ([^}]+)\}/g, (match, type, name) => name);
+
+    text = text.replace(/(\d+d\d+(?:\s*[+\-]\s*\d+)?)/gi, (match) =>
+        `<span style="color: var(--text-accent);">${match}</span>`
+    );
+    text = text.replace(/\+(\d+) to hit/gi, (match, bonus) =>
+        `<span style="color: var(--interactive-accent); font-weight: bold;">+${bonus}</span> to hit`
+    );
+    text = text.replace(/DC (\d+)/gi, (match, dc) =>
+        `<span style="color: var(--interactive-accent); font-weight: bold;">DC ${dc}</span>`
+    );
+    text = text.replace(/\(Recharge ([^)]+)\)/gi, (match) =>
+        `<span style="font-size: 0.9em; color: var(--text-muted);">${match}</span>`
+    );
+
+    return text;
+}
+
+function renderActionsTab(monsterData) {
+    const container = document.createElement('div');
+    container.className = 'monster-modal-tab-content';
+
+    const sections = [
+        { key: 'trait', title: 'Traits' },
+        { key: 'action', title: 'Actions' },
+        { key: 'bonus', title: 'Bonus Actions' },
+        { key: 'reaction', title: 'Reactions' },
+        { key: 'legendary', title: 'Legendary Actions' },
+        { key: 'mythic', title: 'Mythic Actions' }
+    ];
+
+    sections.forEach(({ key, title }) => {
+        if (monsterData[key] && monsterData[key].length > 0) {
+            const section = document.createElement('div');
+            section.style.marginBottom = '20px';
+
+            const header = document.createElement('h3');
+            header.textContent = title;
+            header.style.margin = '0 0 10px 0';
+            header.style.fontSize = '1.2em';
+            header.style.color = 'var(--text-normal)';
+            header.style.borderBottom = `1px solid var(--background-modifier-border)`;
+            header.style.paddingBottom = '5px';
+            section.appendChild(header);
+
+            if (key === 'legendary' && monsterData.legendaryHeader) {
+                const preamble = document.createElement('div');
+                preamble.style.marginBottom = '10px';
+                preamble.style.fontStyle = 'italic';
+                preamble.innerHTML = parseActionEntry(monsterData.legendaryHeader);
+                section.appendChild(preamble);
+            }
+
+            monsterData[key].forEach(item => {
+                const actionDiv = document.createElement('div');
+                actionDiv.style.marginBottom = '10px';
+                actionDiv.style.lineHeight = '1.5';
+
+                const name = document.createElement('strong');
+                name.textContent = `${item.name}.`;
+                actionDiv.appendChild(name);
+
+                const description = document.createElement('span');
+                description.innerHTML = ' ' + parseActionEntry(item.entries);
+                actionDiv.appendChild(description);
+
+                section.appendChild(actionDiv);
+            });
+
+            container.appendChild(section);
+        }
+    });
+
+    if (container.children.length === 0) {
+        const noActions = document.createElement('div');
+        noActions.textContent = 'No actions available';
+        noActions.style.fontStyle = 'italic';
+        noActions.style.color = 'var(--text-muted)';
+        container.appendChild(noActions);
+    }
+
+    return container;
+}
+
+function renderInfoTab(monsterData) {
+    const container = document.createElement('div');
+    container.className = 'monster-modal-tab-content';
+
+    if (monsterData.fluff && monsterData.fluff.entries) {
+        const description = document.createElement('div');
+        description.style.marginBottom = '20px';
+        description.style.lineHeight = '1.6';
+
+        const renderEntries = (entries) => {
+            entries.forEach(entry => {
+                if (typeof entry === 'string') {
+                    const p = document.createElement('p');
+                    p.textContent = entry;
+                    p.style.marginBottom = '10px';
+                    description.appendChild(p);
+                } else if (typeof entry === 'object') {
+                    if (entry.type === 'entries' && entry.entries) {
+                        if (entry.name) {
+                            const h4 = document.createElement('h4');
+                            h4.textContent = entry.name;
+                            h4.style.marginTop = '15px';
+                            h4.style.marginBottom = '5px';
+                            description.appendChild(h4);
+                        }
+                        renderEntries(entry.entries);
+                    } else if (entry.entries) {
+                        renderEntries(entry.entries);
+                    }
+                }
+            });
+        };
+
+        renderEntries(monsterData.fluff.entries);
+        container.appendChild(description);
+    }
+
+    if (monsterData.environment && monsterData.environment.length > 0) {
+        const env = document.createElement('div');
+        env.style.marginBottom = '15px';
+        const envStr = Array.isArray(monsterData.environment)
+            ? monsterData.environment.map(e => e.charAt(0).toUpperCase() + e.slice(1)).join(', ')
+            : String(monsterData.environment);
+        env.innerHTML = `<strong>Environment:</strong> ${envStr}`;
+        container.appendChild(env);
+    }
+
+    if (container.children.length === 0) {
+        const noInfo = document.createElement('div');
+        noInfo.textContent = 'No additional lore available for this creature';
+        noInfo.style.fontStyle = 'italic';
+        noInfo.style.color = 'var(--text-muted)';
+        container.appendChild(noInfo);
+    }
+
+    return container;
+}
+
+export async function showMonsterModal(app, monsterName, source = null) {
+    try {
+        const monsterData = await loadMonsterData(app, monsterName, source);
+
+        if (!monsterData) {
+            alert(`Monster "${monsterName}" not found in enabled sources!`);
+            return;
+        }
+
+        const modal = createModalStructure(monsterData);
+        document.body.appendChild(modal);
+    } catch (error) {
+        console.error('Error showing monster modal:', error);
+        alert(`Failed to load monster data: ${error.message}`);
+    }
 }
 
 if (typeof window !== 'undefined') {

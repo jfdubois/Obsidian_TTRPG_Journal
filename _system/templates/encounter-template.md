@@ -33,7 +33,9 @@ async function loadMonsterModal() {
 
             const wrappedCode = `
                 (function() {
-                    ${modalCode.replace(/export async function/g, 'window.').replace(/export function/g, 'window.')}
+                    ${modalCode
+                        .replace(/export async function\s+(\w+)/g, 'window.$1 = async function')
+                        .replace(/export function\s+(\w+)/g, 'window.$1 = function')}
                 })();
             `;
 
@@ -84,7 +86,7 @@ if (monsters.length === 0) {
         nameButton.addEventListener("click", async () => {
             const showModal = await loadMonsterModal();
             if (showModal) {
-                await showModal(app, monster.name);
+                await showModal(app, monster.name, monster.source);
             }
         });
         row.createEl("td", { text: monster.qty });
