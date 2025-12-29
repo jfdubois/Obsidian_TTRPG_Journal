@@ -62,7 +62,9 @@ export async function run(context) {
                 initiative: initiative,
                 hpMode: hpMode,
                 planned: fm.status !== "inCombat",
-                labels: []
+                addedToCombat: false,
+                labels: [],
+                addedInRound: null
             });
 
             building = await ui.confirm(quickAddApi, "Add another monster?", "Add another", "Finish");

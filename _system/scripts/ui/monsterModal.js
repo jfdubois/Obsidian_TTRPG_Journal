@@ -557,68 +557,168 @@ function createAbilityGrid(monsterData) {
     table.style.borderCollapse = 'collapse';
     table.style.marginTop = '15px';
     table.style.marginBottom = '15px';
-    table.style.border = `1px solid var(--background-modifier-border)`;
 
-    const abilities = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
-    const abilityNames = ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'];
+    const tbody = document.createElement('tbody');
 
-    const headerRow = table.insertRow();
-    abilities.forEach((_, i) => {
-        const th = headerRow.insertCell();
-        th.textContent = abilityNames[i];
-        th.style.padding = '5px';
-        th.style.textAlign = 'center';
-        th.style.fontSize = '0.75em';
-        th.style.fontWeight = 'bold';
-        th.style.textTransform = 'uppercase';
-        th.style.color = 'var(--text-muted)';
-        th.style.borderBottom = `1px solid var(--background-modifier-border)`;
-        if (i > 0) th.style.borderLeft = `1px solid var(--background-modifier-border)`;
+    const headerRow = tbody.insertRow();
+    const abilityGroups = [
+        ['str', 'Str'],
+        ['dex', 'Dex'],
+        ['con', 'Con']
+    ];
+
+    abilityGroups.forEach((group, idx) => {
+        const [key, label] = group;
+
+        const lblCell = headerRow.insertCell();
+        lblCell.style.textAlign = 'right';
+        lblCell.style.padding = '2px 4px';
+
+        const scoreCell = headerRow.insertCell();
+        scoreCell.style.textAlign = 'center';
+        scoreCell.style.padding = '2px 4px';
+
+        const modCell = headerRow.insertCell();
+        modCell.style.textAlign = 'center';
+        modCell.style.padding = '2px 4px';
+        const modDiv = document.createElement('div');
+        modDiv.textContent = 'mod';
+        modDiv.style.color = 'var(--text-muted)';
+        modDiv.style.fontSize = '0.7em';
+        modDiv.style.textTransform = 'uppercase';
+        modCell.appendChild(modDiv);
+
+        const saveCell = headerRow.insertCell();
+        saveCell.style.textAlign = 'center';
+        saveCell.style.padding = '2px 4px';
+        const saveDiv = document.createElement('div');
+        saveDiv.textContent = 'save';
+        saveDiv.style.color = 'var(--text-muted)';
+        saveDiv.style.fontSize = '0.7em';
+        saveDiv.style.textTransform = 'uppercase';
+        saveCell.appendChild(saveDiv);
+
+        if (idx < abilityGroups.length - 1) {
+            const spacerCell = headerRow.insertCell();
+            spacerCell.style.width = '10px';
+        }
     });
 
-    const scoreRow = table.insertRow();
-    abilities.forEach((ability, i) => {
-        const td = scoreRow.insertCell();
-        const score = monsterData[ability];
+    const dataRow = tbody.insertRow();
+    abilityGroups.forEach((group, idx) => {
+        const [key, label] = group;
+        const score = monsterData[key];
+
+        const lblCell = dataRow.insertCell();
+        const lblDiv = document.createElement('div');
+        lblDiv.textContent = label;
+        lblDiv.style.fontWeight = 'bold';
+        lblDiv.style.fontSize = '0.75em';
+        lblDiv.style.textTransform = 'uppercase';
+        lblDiv.style.textAlign = 'right';
+        lblDiv.style.paddingRight = '4px';
+        lblCell.appendChild(lblDiv);
+
+        const scoreCell = dataRow.insertCell();
+        scoreCell.style.textAlign = 'center';
+        scoreCell.style.padding = '2px 4px';
+        const scoreDiv = document.createElement('div');
+        scoreDiv.textContent = score || '—';
+        scoreDiv.style.fontWeight = 'bold';
+        scoreCell.appendChild(scoreDiv);
+
+        const modCell = dataRow.insertCell();
+        modCell.style.textAlign = 'center';
+        modCell.style.padding = '2px 4px';
+        const modDiv = document.createElement('div');
         if (score) {
             const mod = Math.floor((score - 10) / 2);
-            const modStr = mod >= 0 ? `+${mod}` : String(mod);
-            const scoreDiv = document.createElement('div');
-            scoreDiv.style.fontSize = '1.1em';
-            scoreDiv.style.fontWeight = 'bold';
-            scoreDiv.textContent = String(score);
-            const modDiv = document.createElement('div');
-            modDiv.style.fontSize = '0.9em';
-            modDiv.textContent = modStr;
-            td.appendChild(scoreDiv);
-            td.appendChild(modDiv);
+            modDiv.textContent = mod >= 0 ? `+${mod}` : String(mod);
         } else {
-            td.textContent = '—';
+            modDiv.textContent = '—';
         }
-        td.style.padding = '5px';
-        td.style.textAlign = 'center';
-        td.style.borderBottom = `1px solid var(--background-modifier-border)`;
-        if (i > 0) td.style.borderLeft = `1px solid var(--background-modifier-border)`;
+        modCell.appendChild(modDiv);
+
+        const saveCell = dataRow.insertCell();
+        saveCell.style.textAlign = 'center';
+        saveCell.style.padding = '2px 4px';
+        const saveDiv = document.createElement('div');
+        const save = monsterData.save && monsterData.save[key];
+        if (save) {
+            saveDiv.textContent = save;
+            saveDiv.style.fontWeight = 'bold';
+        } else {
+            saveDiv.textContent = '—';
+            saveDiv.style.opacity = '0.5';
+        }
+        saveCell.appendChild(saveDiv);
+
+        if (idx < abilityGroups.length - 1) {
+            const spacerCell = dataRow.insertCell();
+        }
     });
 
-    const saveRow = table.insertRow();
-    abilities.forEach((ability, i) => {
-        const td = saveRow.insertCell();
-        const saveValue = monsterData.save && monsterData.save[ability];
-        if (saveValue) {
-            td.textContent = saveValue;
-            td.style.fontWeight = 'bold';
-            td.style.opacity = '1';
+    const dataRow2 = tbody.insertRow();
+    const abilityGroups2 = [
+        ['int', 'Int'],
+        ['wis', 'Wis'],
+        ['cha', 'Cha']
+    ];
+
+    abilityGroups2.forEach((group, idx) => {
+        const [key, label] = group;
+        const score = monsterData[key];
+
+        const lblCell = dataRow2.insertCell();
+        const lblDiv = document.createElement('div');
+        lblDiv.textContent = label;
+        lblDiv.style.fontWeight = 'bold';
+        lblDiv.style.fontSize = '0.75em';
+        lblDiv.style.textTransform = 'uppercase';
+        lblDiv.style.textAlign = 'right';
+        lblDiv.style.paddingRight = '4px';
+        lblCell.appendChild(lblDiv);
+
+        const scoreCell = dataRow2.insertCell();
+        scoreCell.style.textAlign = 'center';
+        scoreCell.style.padding = '2px 4px';
+        const scoreDiv = document.createElement('div');
+        scoreDiv.textContent = score || '—';
+        scoreDiv.style.fontWeight = 'bold';
+        scoreCell.appendChild(scoreDiv);
+
+        const modCell = dataRow2.insertCell();
+        modCell.style.textAlign = 'center';
+        modCell.style.padding = '2px 4px';
+        const modDiv = document.createElement('div');
+        if (score) {
+            const mod = Math.floor((score - 10) / 2);
+            modDiv.textContent = mod >= 0 ? `+${mod}` : String(mod);
         } else {
-            td.textContent = '—';
-            td.style.opacity = '0.5';
+            modDiv.textContent = '—';
         }
-        td.style.padding = '5px';
-        td.style.textAlign = 'center';
-        td.style.fontSize = '0.9em';
-        if (i > 0) td.style.borderLeft = `1px solid var(--background-modifier-border)`;
+        modCell.appendChild(modDiv);
+
+        const saveCell = dataRow2.insertCell();
+        saveCell.style.textAlign = 'center';
+        saveCell.style.padding = '2px 4px';
+        const saveDiv = document.createElement('div');
+        const save = monsterData.save && monsterData.save[key];
+        if (save) {
+            saveDiv.textContent = save;
+            saveDiv.style.fontWeight = 'bold';
+        } else {
+            saveDiv.textContent = '—';
+            saveDiv.style.opacity = '0.5';
+        }
+        saveCell.appendChild(saveDiv);
+
+        if (idx < abilityGroups2.length - 1) {
+            const spacerCell = dataRow2.insertCell();
+        }
     });
 
+    table.appendChild(tbody);
     return table;
 }
 

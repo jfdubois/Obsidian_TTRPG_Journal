@@ -244,3 +244,49 @@ export function stripWikiLinks(text) {
     if (!text) return '';
     return text.replace(/\[\[|\]\]/g, '');
 }
+
+/**
+ * Migrate frontmatter to support new combat tracking fields
+ * Ensures backward compatibility with existing encounter notes by adding:
+ * - addedToCombat field to monsters (defaults to true for existing monsters)
+ * - addedInRound field to monsters (defaults to null)
+ * - combatStats object for encounters in combat status
+ *
+ * @param {Object} frontmatter - Frontmatter object to migrate
+ * @returns {boolean} True if migration was performed, false otherwise
+ *
+ * @example
+ * const migrated = migrateFrontmatterIfNeeded(fm);
+ */
+export function migrateFrontmatterIfNeeded(frontmatter) {
+    if (!frontmatter) {
+        return false;
+    }
+
+    let migrated = false;
+
+    if (Array.isArray(frontmatter.monsters)) {
+        frontmatter.monsters.forEach(m => {
+            if (m.addedToCombat === undefined) {
+                m.addedToCombat = true;
+                migrated = true;
+            }
+            if (m.addedInRound === undefined) {
+                m.addedInRound = null;
+                migrated = true;
+            }
+        });
+    }
+
+    if (!frontmatter.combatStats && frontmatter.status === ENCOUNTER_STATUSES.IN_COMBAT) {
+        frontmatter.combatStats = {
+            damageDealt: {},
+            damageTaken: {},
+            healingProvided: {},
+            kills: {}
+        };
+        migrated = true;
+    }
+
+    return migrated;
+}

@@ -47,6 +47,13 @@ export async function run(context) {
             frontmatter.round = frontmatter.round || 1;
             frontmatter.currentTurn = 0;
             frontmatter.initiatives = sortedInitiatives;
+
+            combat.initializeCombatStats(frontmatter);
+
+            (frontmatter.monsters || []).forEach(m => {
+                m.addedToCombat = true;
+                m.addedInRound = null;
+            });
         });
 
         await combat.logCombatAction(app, file, 1, 'round', { round: 1 });

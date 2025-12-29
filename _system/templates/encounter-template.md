@@ -16,7 +16,7 @@ combatLog: []
 
 ## Additional information
 
-## Planification
+## Monsters
 
 ```dataviewjs
 const monsters = dv.current().monsters || [];
@@ -68,12 +68,19 @@ if (monsters.length === 0) {
     table.style.width = "100%";
     const thead = table.createEl("thead");
     const headerRow = thead.createEl("tr");
-    ["Monster", "Qty", "Initiative", "HP Mode", "Actions"].forEach(header => {
+    ["Status", "Monster", "Qty", "Initiative", "HP Mode", "Actions"].forEach(header => {
         headerRow.createEl("th", { text: header });
     });
     const tbody = table.createEl("tbody");
     monsters.forEach((monster, index) => {
         const row = tbody.createEl("tr");
+        const statusCell = row.createEl("td");
+        const statusText = monster.planned === false ? "U" : "P";
+        const statusColor = monster.planned === false ? "#ffc107" : "var(--text-normal)";
+        statusCell.textContent = statusText;
+        statusCell.style.fontWeight = "bold";
+        statusCell.style.color = statusColor;
+        statusCell.style.textAlign = "center";
         const nameCell = row.createEl("td");
         const nameButton = nameCell.createEl("button", { text: monster.name });
         nameButton.style.cursor = "pointer";
@@ -114,6 +121,11 @@ if (monsters.length === 0) {
 name Add Monsters
 type command
 action QuickAdd: add-monster
+```
+```button
+name Update Combat
+type command
+action QuickAdd: update-combat
 ```
 ```button
 name Set Players Initiatives
@@ -176,7 +188,8 @@ if (status === "planned") {
         row.createEl("td", { text: hp });
         row.createEl("td", { text: combatant.ac || "--" });
         row.createEl("td", { text: combatant.speed || "--" });
-        row.createEl("td", { text: combatant.status || "healthy" });
+        const statusText = combatant.type === "monster" ? (combatant.status || "healthy") : "--";
+        row.createEl("td", { text: statusText });
     });
 }
 ```
@@ -199,3 +212,169 @@ action QuickAdd: combat-heal
 ```
 
 ## Combat Log
+
+```dataviewjs
+const logs = dv.current().combatLog || [];
+
+if (logs.length === 0) {
+    dv.paragraph("_No combat events yet_");
+} else {
+    const logsByRound = {};
+    for (const entry of logs) {
+        const round = typeof entry === 'string'
+            ? (entry.match(/^Round (\d+)/) || [null, 1])[1]
+            : entry.round || 1;
+        if (!logsByRound[round]) logsByRound[round] = [];
+        logsByRound[round].push(entry);
+    }
+
+    const currentRound = dv.current().round;
+
+    for (const [round, entries] of Object.entries(logsByRound).sort((a, b) => a[0] - b[0])) {
+        const details = dv.container.createEl('details', { cls: 'combat-round' });
+        if (parseInt(round) === currentRound) details.setAttribute('open', 'open');
+
+        const summary = details.createEl('summary');
+        summary.style.cursor = 'pointer';
+        summary.style.fontWeight = 'bold';
+        summary.style.padding = '8px';
+        summary.style.backgroundColor = 'var(--background-secondary)';
+        summary.style.borderRadius = '4px';
+        summary.style.marginBottom = '4px';
+        summary.textContent = `Round ${round} (${entries.length} events)`;
+
+        const logList = details.createEl('ul');
+        logList.style.marginTop = '8px';
+        logList.style.paddingLeft = '20px';
+
+        for (const entry of entries) {
+            const li = logList.createEl('li');
+            li.style.marginBottom = '4px';
+
+            if (typeof entry === 'string') {
+                li.textContent = entry.replace(/^Round \d+:\s*/, '');
+            } else {
+                const data = entry.data;
+                switch (entry.type) {
+                    case 'round':
+                        li.innerHTML = '<strong>Round begins</strong>';
+                        break;
+                    case 'damage':
+                        const killed = data.killed ? ' <span style="color: red;">(KILLED)</span>' : '';
+                        li.innerHTML = `${data.source || '?'} → ${data.target}: <strong>${data.amount} ${data.damageType}</strong> damage (${data.newHp}/${data.maxHp} HP)${killed}`;
+                        break;
+                    case 'heal':
+                        li.innerHTML = `${data.source || '?'} → ${data.target}: <strong>+${data.amount} HP</strong> (${data.newHp}/${data.maxHp} HP)`;
+                        break;
+                    case 'reinforcement':
+                        li.innerHTML = `<strong style="color: orange;">${data.name} x${data.qty} reinforcements arrived!</strong>`;
+                        break;
+                    case 'end':
+                        li.innerHTML = '<strong style="color: green;">Combat ended</strong>';
+                        break;
+                    default:
+                        li.textContent = JSON.stringify(entry);
+                }
+            }
+        }
+    }
+}
+```
+
+## Battle Statistics
+
+```dataviewjs
+const status = dv.current().status;
+const stats = dv.current().combatStats;
+
+if (status === 'planned') {
+    dv.paragraph("_Combat has not started_");
+} else if (!stats || Object.keys(stats.damageDealt || {}).length === 0) {
+    dv.paragraph("_No battle statistics yet_");
+} else {
+    if (Object.keys(stats.damageDealt || {}).length > 0) {
+        const section = dv.container.createEl('div');
+        section.style.marginBottom = '16px';
+        section.createEl('h4', { text: 'Damage Dealt' });
+        const table = section.createEl('table');
+        table.style.width = '100%';
+        const thead = table.createEl('thead');
+        const headerRow = thead.createEl('tr');
+        headerRow.createEl('th', { text: 'Combatant' });
+        headerRow.createEl('th', { text: 'Total Damage' });
+        const tbody = table.createEl('tbody');
+
+        Object.entries(stats.damageDealt)
+            .sort((a, b) => b[1] - a[1])
+            .forEach(([combatant, damage]) => {
+                const row = tbody.createEl('tr');
+                row.createEl('td', { text: combatant });
+                row.createEl('td', { text: damage });
+            });
+    }
+
+    if (Object.keys(stats.damageTaken || {}).length > 0) {
+        const section = dv.container.createEl('div');
+        section.style.marginBottom = '16px';
+        section.createEl('h4', { text: 'Damage Taken' });
+        const table = section.createEl('table');
+        table.style.width = '100%';
+        const thead = table.createEl('thead');
+        const headerRow = thead.createEl('tr');
+        headerRow.createEl('th', { text: 'Combatant' });
+        headerRow.createEl('th', { text: 'Total Damage' });
+        const tbody = table.createEl('tbody');
+
+        Object.entries(stats.damageTaken)
+            .sort((a, b) => b[1] - a[1])
+            .forEach(([combatant, damage]) => {
+                const row = tbody.createEl('tr');
+                row.createEl('td', { text: combatant });
+                row.createEl('td', { text: damage });
+            });
+    }
+
+    if (Object.keys(stats.healingProvided || {}).length > 0) {
+        const section = dv.container.createEl('div');
+        section.style.marginBottom = '16px';
+        section.createEl('h4', { text: 'Healing Provided' });
+        const table = section.createEl('table');
+        table.style.width = '100%';
+        const thead = table.createEl('thead');
+        const headerRow = thead.createEl('tr');
+        headerRow.createEl('th', { text: 'Healer' });
+        headerRow.createEl('th', { text: 'Total Healing' });
+        const tbody = table.createEl('tbody');
+
+        Object.entries(stats.healingProvided)
+            .sort((a, b) => b[1] - a[1])
+            .forEach(([healer, healing]) => {
+                const row = tbody.createEl('tr');
+                row.createEl('td', { text: healer });
+                row.createEl('td', { text: healing });
+            });
+    }
+
+    if (Object.keys(stats.kills || {}).length > 0) {
+        const section = dv.container.createEl('div');
+        section.createEl('h4', { text: 'Kills/Takedowns' });
+        const table = section.createEl('table');
+        table.style.width = '100%';
+        const thead = table.createEl('thead');
+        const headerRow = thead.createEl('tr');
+        headerRow.createEl('th', { text: 'Combatant' });
+        headerRow.createEl('th', { text: 'Kills' });
+        headerRow.createEl('th', { text: 'Targets' });
+        const tbody = table.createEl('tbody');
+
+        Object.entries(stats.kills)
+            .sort((a, b) => b[1].length - a[1].length)
+            .forEach(([combatant, targets]) => {
+                const row = tbody.createEl('tr');
+                row.createEl('td', { text: combatant });
+                row.createEl('td', { text: targets.length });
+                row.createEl('td', { text: targets.join(', ') });
+            });
+    }
+}
+```

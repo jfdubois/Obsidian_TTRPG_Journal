@@ -37,6 +37,12 @@ export async function run(context) {
                     initiativeEntry.currentHp = result.newHp;
                     initiativeEntry.status = result.newStatus;
                 }
+                combat.trackHealing(
+                    frontmatter.combatStats,
+                    source,
+                    target.label || core.stripWikiLinks(target.name),
+                    healing
+                );
             });
 
             await combat.logCombatAction(app, file, fm.round || 1, 'heal', {

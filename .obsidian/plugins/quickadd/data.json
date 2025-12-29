@@ -207,6 +207,26 @@
       }
     },
     {
+      "id": "2412a0c8-ac6a-4216-8314-be9b66c193ee",
+      "name": "update-combat",
+      "type": "Macro",
+      "command": true,
+      "runOnStartup": false,
+      "macro": {
+        "name": "update-combat",
+        "id": "2ae1c8f2-6aac-43d4-b0fd-4ac03a75ea7f",
+        "commands": [
+          {
+            "name": "updateCombat",
+            "type": "UserScript",
+            "id": "7f11ec26-f040-4ee7-a004-378c7a40f6d1",
+            "path": "_system/scripts/quickadd/updateCombat.js",
+            "settings": {}
+          }
+        ]
+      }
+    },
+    {
       "id": "0c482e62-d4ef-49df-a1ea-fa8f7e7ad8b1",
       "name": "create-world",
       "type": "Macro",

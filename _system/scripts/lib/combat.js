@@ -5,6 +5,7 @@
 
 import { D20_SIDES, ALPHABET_LENGTH } from './constants.js';
 import { stripWikiLinks } from './core.js';
+import * as core from './core.js';
 
 /**
  * Roll initiative with DEX modifier
@@ -166,47 +167,32 @@ export function advanceTurn(fm) {
     return { nextTurn, nextRound, isNewRound };
 }
 
-export function formatLogEntry(round, action, data) {
-    const timestamp = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-
-    switch (action) {
-        case 'damage':
-            if (data.oldHp === undefined) {
-                return `- ${timestamp}: ${data.source} dealt ${data.amount} ${data.damageType} damage to ${data.target} (HP not tracked)`;
-            }
-            return `- ${timestamp}: ${data.source} dealt ${data.amount} ${data.damageType} damage to ${data.target} (${data.oldHp} -> ${data.newHp}/${data.maxHp})`;
-        case 'heal':
-            if (data.oldHp === undefined) {
-                return `- ${timestamp}: ${data.source} healed ${data.target} for ${data.amount} HP (HP not tracked)`;
-            }
-            return `- ${timestamp}: ${data.source} healed ${data.target} for ${data.amount} HP (${data.oldHp} -> ${data.newHp}/${data.maxHp})`;
+function formatCombatLogEntry(round, actionType, data) {
+    switch (actionType) {
+        case 'reinforcement':
+            return `Round ${round}: ${data.name} x${data.qty} joined the fight!`;
         case 'round':
-            return `- **Round ${data.round} begins!**`;
-        case 'end':
-            return `- === COMBAT ENDED === (${timestamp})`;
+            return `Round ${round} begins`;
+        case 'damage':
+            return `Round ${round}: ${data.target} takes ${data.amount} ${data.damageType} damage`;
+        case 'heal':
+            return `Round ${round}: ${data.target} healed ${data.amount} HP`;
+        case 'turn':
+            return `Round ${round}: ${data.name}'s turn`;
         default:
-            return `- ${timestamp}: ${data.message || action}`;
+            return `Round ${round}: ${actionType}`;
     }
 }
 
-export function appendToLog(content, entry) {
-    if (content.includes("## Combat Log")) {
-        return content.replace(/(## Combat Log\n)/, `$1${entry}\n`);
-    } else {
-        return content + `\n\n## Combat Log\n${entry}\n`;
-    }
-}
-
-/**
- * Log combat action with automatic file read/write
- * Eliminates 4 duplications
- */
 export async function logCombatAction(app, file, round, actionType, data) {
-    let content = await app.vault.read(file);
-    const logEntry = formatLogEntry(round, actionType, data);
-    content = appendToLog(content, logEntry);
-    await app.vault.cachedRead(file);
-    await app.vault.modify(file, content);
+    const logEntry = formatCombatLogEntry(round, actionType, data);
+
+    await core.updateFrontmatter(app, file, (frontmatter) => {
+        if (!frontmatter.combatLog) {
+            frontmatter.combatLog = [];
+        }
+        frontmatter.combatLog.push(logEntry);
+    });
 }
 
 /**
@@ -229,4 +215,89 @@ export function modifyHP(target, delta, operation = 'damage') {
     target.status = getHealthStatus(newHp, target.maxHp);
 
     return { oldHp, newHp, newStatus: target.status };
+}
+
+/**
+ * Initialize combat statistics tracking structure
+ *
+ * @param {Object} frontmatter - Encounter frontmatter object
+ *
+ * @example
+ * initializeCombatStats(frontmatter)
+ */
+export function initializeCombatStats(frontmatter) {
+    if (!frontmatter || typeof frontmatter !== 'object') {
+        throw new Error("Invalid frontmatter: must be an object");
+    }
+    if (!frontmatter.combatStats) {
+        frontmatter.combatStats = {
+            damageDealt: {},
+            damageTaken: {},
+            healingProvided: {},
+            kills: {}
+        };
+    }
+}
+
+/**
+ * Track damage dealt and taken in combat statistics
+ *
+ * @param {Object} stats - Combat stats object from frontmatter
+ * @param {string} source - Label of damage source combatant
+ * @param {string} target - Label of damage target combatant
+ * @param {number} amount - Damage amount
+ * @param {boolean} killed - Whether target was killed
+ *
+ * @example
+ * trackDamage(stats, "P1", "G1", 15, false)
+ */
+export function trackDamage(stats, source, target, amount, killed = false) {
+    if (!stats || typeof stats !== 'object') {
+        throw new Error("Invalid stats: must be an object");
+    }
+    if (typeof target !== 'string' || !target) {
+        throw new Error("Invalid target: must be a non-empty string");
+    }
+    if (typeof amount !== 'number' || amount < 0) {
+        throw new Error("Damage amount must be a non-negative number");
+    }
+    if (typeof killed !== 'boolean') {
+        throw new Error("Invalid killed: must be a boolean");
+    }
+
+    if (source && source !== '?') {
+        stats.damageDealt[source] = (stats.damageDealt[source] || 0) + amount;
+    }
+    stats.damageTaken[target] = (stats.damageTaken[target] || 0) + amount;
+    if (killed && source && source !== '?') {
+        if (!stats.kills[source]) stats.kills[source] = [];
+        stats.kills[source].push(target);
+    }
+}
+
+/**
+ * Track healing provided in combat statistics
+ *
+ * @param {Object} stats - Combat stats object from frontmatter
+ * @param {string} source - Label of healing source combatant
+ * @param {string} target - Label of healing target combatant
+ * @param {number} amount - Healing amount
+ *
+ * @example
+ * trackHealing(stats, "P2", "P1", 8)
+ */
+export function trackHealing(stats, source, target, amount) {
+    if (!stats || typeof stats !== 'object') {
+        throw new Error("Invalid stats: must be an object");
+    }
+    if (typeof target !== 'string' || !target) {
+        throw new Error("Invalid target: must be a non-empty string");
+    }
+    if (typeof amount !== 'number' || amount < 0) {
+        throw new Error("Healing amount must be a non-negative number");
+    }
+
+    if (source && source !== '?') {
+        stats.healingProvided[source] = (stats.healingProvided[source] || 0) + amount;
+    }
 }

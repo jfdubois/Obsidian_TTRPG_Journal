@@ -23,6 +23,7 @@ export async function run(context) {
         if (!damageType) return;
 
         const result = combat.applyDamageToTarget(target, damageAmount);
+        const killed = result.newHp === 0 && result.oldHp > 0;
 
         if (result.skipped) {
             await combat.logCombatAction(app, file, fm.round || 1, 'damage', {
@@ -43,6 +44,13 @@ export async function run(context) {
                     initiativeEntry.currentHp = result.newHp;
                     initiativeEntry.status = result.newStatus;
                 }
+                combat.trackDamage(
+                    frontmatter.combatStats,
+                    source,
+                    target.label || core.stripWikiLinks(target.name),
+                    damageAmount,
+                    killed
+                );
             });
 
             await combat.logCombatAction(app, file, fm.round || 1, 'damage', {
@@ -52,7 +60,8 @@ export async function run(context) {
                 damageType: damageType,
                 oldHp: result.oldHp,
                 newHp: result.newHp,
-                maxHp: target.maxHp
+                maxHp: target.maxHp,
+                killed: killed
             });
 
             ui.refreshDataview(app);
