@@ -33,8 +33,20 @@ export async function run(context) {
 
             if (!monsterName) break;
 
-            const monsterNameOnly = monsterName.replace(/\s*\([^)]*\)$/, '');
-            const selectedMonster = allMonsters.find(m => m.name === monsterNameOnly);
+            const match = monsterName.match(/^(.+?)\s*\(([^)]+)\)$/);
+            if (!match) {
+                ui.notifyError("Invalid monster selection format");
+                continue;
+            }
+
+            const monsterNameOnly = match[1];
+            const sourceOnly = match[2];
+            const selectedMonster = allMonsters.find(m => m.name === monsterNameOnly && m.source === sourceOnly);
+
+            if (!selectedMonster) {
+                ui.notifyError(`Monster "${monsterNameOnly}" from "${sourceOnly}" not found`);
+                continue;
+            }
 
             const qty = await ui.promptForPositiveNumber(quickAddApi, "Quantity:", 1);
             if (!qty) continue;
