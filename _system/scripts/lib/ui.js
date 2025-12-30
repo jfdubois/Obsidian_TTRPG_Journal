@@ -41,38 +41,62 @@ export async function showForm(app, formName, options = {}) {
     return await modalForm.openForm(formName, options);
 }
 
-export function buildTargetChoices(initiatives) {
-    const displayChoices = initiatives.map(i => {
+export function buildTargetChoices(initiatives, currentTurnIndex = null) {
+    // Sort initiatives to put current turn first
+    let sortedInitiatives = [...initiatives];
+    if (currentTurnIndex !== null && currentTurnIndex >= 0 && currentTurnIndex < initiatives.length) {
+        const currentTurn = initiatives[currentTurnIndex];
+        sortedInitiatives = [
+            currentTurn,
+            ...initiatives.filter((_, idx) => idx !== currentTurnIndex)
+        ];
+    }
+
+    const displayChoices = sortedInitiatives.map(i => {
         const name = stripWikiLinks(i.name) || 'Unknown';
         const hp = i.type === "monster" ? ` [${i.currentHp}/${i.maxHp} HP]` : '';
         const label = i.label ? ` (${i.label})` : '';
-        return `${name}${label}${hp}`;
+        return `Target: ${name}${label}${hp}`;
     });
 
-    const values = initiatives.map(i => i.label || stripWikiLinks(i.name) || 'Unknown');
+    const values = sortedInitiatives.map(i => i.label || stripWikiLinks(i.name) || 'Unknown');
 
     return { displayChoices, values };
 }
 
-export async function promptForTarget(quickAddApi, initiatives, placeholder = "Select target...") {
-    const { displayChoices, values } = buildTargetChoices(initiatives);
-    const selectedLabel = await selectFromList(quickAddApi, displayChoices, values, placeholder);
+export async function promptForTarget(quickAddApi, initiatives, placeholder = "Select target...", currentTurnIndex = null) {
+    const { displayChoices, values } = buildTargetChoices(initiatives, currentTurnIndex);
+    const selectedLabel = await selectFromList(quickAddApi, displayChoices, values, `Target: ${placeholder}`);
     if (!selectedLabel) return null;
 
+    // Find in original initiatives array, not sorted
     return initiatives.find(i =>
         i.label === selectedLabel ||
         stripWikiLinks(i.name) === selectedLabel
     );
 }
 
-export function buildSourceChoices(initiatives) {
-    const displayChoices = initiatives.map(i => {
+export function buildSourceChoices(initiatives, currentTurnIndex = null) {
+    // Sort initiatives to put current turn first
+    let sortedInitiatives = [...initiatives];
+    if (currentTurnIndex !== null && currentTurnIndex >= 0 && currentTurnIndex < initiatives.length) {
+        const currentTurn = initiatives[currentTurnIndex];
+        sortedInitiatives = [
+            currentTurn,
+            ...initiatives.filter((_, idx) => idx !== currentTurnIndex)
+        ];
+    }
+
+    const displayChoices = sortedInitiatives.map(i => {
         const name = stripWikiLinks(i.name) || 'Unknown';
+        const hp = i.type === "monster" ? ` [${i.currentHp}/${i.maxHp} HP]` : '';
         const label = i.label ? ` (${i.label})` : '';
-        return `${name}${label}`;
+        return `Source: ${name}${label}${hp}`;
     });
 
-    return { displayChoices, values: displayChoices };
+    const values = sortedInitiatives.map(i => i.label || stripWikiLinks(i.name) || 'Unknown');
+
+    return { displayChoices, values };
 }
 
 export const DAMAGE_TYPES = [
@@ -133,9 +157,9 @@ export async function selectOption(quickAddApi, options, placeholder = "Select..
  * Prompt for combat source (attacker/healer)
  * Eliminates 2 duplications
  */
-export async function promptForSource(quickAddApi, initiatives, action = "acting") {
-    const { displayChoices, values } = buildSourceChoices(initiatives);
-    const source = await selectFromList(quickAddApi, displayChoices, values, `Who is ${action}?`);
+export async function promptForSource(quickAddApi, initiatives, action = "acting", currentTurnIndex = null) {
+    const { displayChoices, values } = buildSourceChoices(initiatives, currentTurnIndex);
+    const source = await selectFromList(quickAddApi, displayChoices, values, `Source: Who is ${action}?`);
     if (!source) {
         throw new Error("Source selection cancelled");
     }

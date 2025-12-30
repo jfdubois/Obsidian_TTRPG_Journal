@@ -10,14 +10,30 @@ export async function run(context) {
         const { file, fm } = core.validateEncounterContext(app, [ENCOUNTER_STATUSES.IN_COMBAT]);
         const initiatives = core.requireInitiatives(fm);
 
-        const source = await ui.promptForSource(quickAddApi, initiatives, "healing");
-        const target = await ui.promptForTarget(quickAddApi, initiatives, "Select target to heal:");
+        const source = await ui.promptForSource(quickAddApi, initiatives, "healing", fm.currentTurn);
+        const target = await ui.promptForTarget(quickAddApi, initiatives, "Select target to heal:", fm.currentTurn);
         if (!target) return;
 
         const healing = await ui.promptForPositiveNumber(quickAddApi, "Healing amount:", 1);
         if (!healing) return;
 
         const result = combat.applyHealingToTarget(target, healing);
+
+        await core.updateFrontmatter(app, file, (frontmatter) => {
+            if (!result.skipped) {
+                const initiativeEntry = frontmatter.initiatives.find(i => i.label === target.label);
+                if (initiativeEntry) {
+                    initiativeEntry.currentHp = result.newHp;
+                    initiativeEntry.status = result.newStatus;
+                }
+            }
+            combat.trackHealing(
+                frontmatter.combatStats,
+                source,
+                target.label || core.stripWikiLinks(target.name),
+                healing
+            );
+        });
 
         if (result.skipped) {
             await combat.logCombatAction(app, file, fm.round || 1, 'heal', {
@@ -31,19 +47,6 @@ export async function run(context) {
             ui.refreshDataview(app);
             ui.notifyWarning(`${target.label || target.name} has no HP tracked - healing not applied`);
         } else {
-            await core.updateFrontmatter(app, file, (frontmatter) => {
-                const initiativeEntry = frontmatter.initiatives.find(i => i.label === target.label);
-                if (initiativeEntry) {
-                    initiativeEntry.currentHp = result.newHp;
-                    initiativeEntry.status = result.newStatus;
-                }
-                combat.trackHealing(
-                    frontmatter.combatStats,
-                    source,
-                    target.label || core.stripWikiLinks(target.name),
-                    healing
-                );
-            });
 
             await combat.logCombatAction(app, file, fm.round || 1, 'heal', {
                 source: source,

@@ -10,8 +10,8 @@ export async function run(context) {
         const { file, fm } = core.validateEncounterContext(app, [ENCOUNTER_STATUSES.IN_COMBAT]);
         const initiatives = core.requireInitiatives(fm);
 
-        const source = await ui.promptForSource(quickAddApi, initiatives, "attacking");
-        const target = await ui.promptForTarget(quickAddApi, initiatives, "Select target:");
+        const source = await ui.promptForSource(quickAddApi, initiatives, "attacking", fm.currentTurn);
+        const target = await ui.promptForTarget(quickAddApi, initiatives, "Select target:", fm.currentTurn);
         if (!target) return;
 
         const damageAmount = await ui.promptForPositiveNumber(quickAddApi, "Damage amount:", 1);
@@ -24,6 +24,23 @@ export async function run(context) {
 
         const result = combat.applyDamageToTarget(target, damageAmount);
         const killed = result.newHp === 0 && result.oldHp > 0;
+
+        await core.updateFrontmatter(app, file, (frontmatter) => {
+            if (!result.skipped) {
+                const initiativeEntry = frontmatter.initiatives.find(i => i.label === target.label);
+                if (initiativeEntry) {
+                    initiativeEntry.currentHp = result.newHp;
+                    initiativeEntry.status = result.newStatus;
+                }
+            }
+            combat.trackDamage(
+                frontmatter.combatStats,
+                source,
+                target.label || core.stripWikiLinks(target.name),
+                damageAmount,
+                killed
+            );
+        });
 
         if (result.skipped) {
             await combat.logCombatAction(app, file, fm.round || 1, 'damage', {
@@ -38,20 +55,6 @@ export async function run(context) {
             ui.refreshDataview(app);
             ui.notifyWarning(`${target.label || target.name} has no HP tracked - damage not applied`);
         } else {
-            await core.updateFrontmatter(app, file, (frontmatter) => {
-                const initiativeEntry = frontmatter.initiatives.find(i => i.label === target.label);
-                if (initiativeEntry) {
-                    initiativeEntry.currentHp = result.newHp;
-                    initiativeEntry.status = result.newStatus;
-                }
-                combat.trackDamage(
-                    frontmatter.combatStats,
-                    source,
-                    target.label || core.stripWikiLinks(target.name),
-                    damageAmount,
-                    killed
-                );
-            });
 
             await combat.logCombatAction(app, file, fm.round || 1, 'damage', {
                 source: source,
