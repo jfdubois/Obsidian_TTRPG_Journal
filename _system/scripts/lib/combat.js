@@ -174,9 +174,9 @@ function formatCombatLogEntry(round, actionType, data) {
         case 'round':
             return `Round ${round} begins`;
         case 'damage':
-            return `Round ${round}: ${data.target} takes ${data.amount} ${data.damageType} damage`;
+            return `Round ${round}: ${data.target} takes ${data.amount} ${data.damageType} damage from ${data.source}`;
         case 'heal':
-            return `Round ${round}: ${data.target} healed ${data.amount} HP`;
+            return `Round ${round}: ${data.target} healed ${data.amount} HP from ${data.source}`;
         case 'turn':
             return `Round ${round}: ${data.name}'s turn`;
         default:
