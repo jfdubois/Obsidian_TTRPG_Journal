@@ -21,6 +21,46 @@ export function rollInitiative(dexModString) {
     return Math.floor(Math.random() * D20_SIDES) + 1 + (mod ? parseInt(mod[1]) : 0);
 }
 
+export function calculateProficiencyBonus(cr) {
+    let crValue = cr;
+    if (typeof cr === 'object' && cr !== null && cr.cr) {
+        crValue = cr.cr;
+    }
+
+    const crStr = String(crValue);
+    let crNum;
+
+    if (crStr === '0') {
+        crNum = 0;
+    } else if (crStr.includes('/')) {
+        const [num, denom] = crStr.split('/').map(Number);
+        crNum = num / denom;
+    } else {
+        crNum = parseFloat(crStr) || 0;
+    }
+
+    if (crNum <= 4) return 2;
+    if (crNum <= 8) return 3;
+    if (crNum <= 12) return 4;
+    if (crNum <= 16) return 5;
+    if (crNum <= 20) return 6;
+    if (crNum <= 24) return 7;
+    if (crNum <= 28) return 8;
+    return 9;
+}
+
+export function calculateInitiativeModifier(dexModString, cr, initiativeProficiency) {
+    const dexMod = dexModString?.match(/([+-]?\d+)/);
+    let totalMod = dexMod ? parseInt(dexMod[1]) : 0;
+
+    if (initiativeProficiency && initiativeProficiency > 0) {
+        const proficiencyBonus = calculateProficiencyBonus(cr);
+        totalMod += proficiencyBonus * initiativeProficiency;
+    }
+
+    return totalMod >= 0 ? `+${totalMod}` : `${totalMod}`;
+}
+
 /**
  * Parse hit dice string into components
  *

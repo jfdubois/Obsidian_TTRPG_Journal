@@ -46,12 +46,32 @@ function parseCR(cr) {
 }
 
 function calculateXP(cr) {
-    const crStr = String(cr);
+    let crValue = cr;
+    if (typeof cr === 'object' && cr !== null && cr.cr) {
+        crValue = cr.cr;
+    }
+    const crStr = String(crValue);
     return CR_TO_XP[crStr] || 0;
 }
 
 function calculateProficiencyBonus(cr) {
-    const crNum = parseCR(cr);
+    let crValue = cr;
+    if (typeof cr === 'object' && cr !== null && cr.cr) {
+        crValue = cr.cr;
+    }
+
+    const crStr = String(crValue);
+    let crNum;
+
+    if (crStr === '0') {
+        crNum = 0;
+    } else if (crStr.includes('/')) {
+        const [num, denom] = crStr.split('/').map(Number);
+        crNum = num / denom;
+    } else {
+        crNum = parseFloat(crStr) || 0;
+    }
+
     if (crNum <= 4) return 2;
     if (crNum <= 8) return 3;
     if (crNum <= 12) return 4;
@@ -472,7 +492,7 @@ function renderStatsTab(monsterData) {
     }
 
     const initMod = initBonus >= 0 ? `+${initBonus}` : String(initBonus);
-    init.innerHTML = `<strong>Initiative</strong> ${initMod} (${monsterData.dex || 'Unknown'})`;
+    init.innerHTML = `<strong>Initiative</strong> ${initMod}`;
 
     acInit.appendChild(ac);
     acInit.appendChild(init);
@@ -541,9 +561,12 @@ function renderStatsTab(monsterData) {
     const cr = document.createElement('div');
     cr.style.marginTop = '15px';
     cr.style.marginBottom = '10px';
-    const crValue = monsterData.cr || 'Unknown';
-    const xp = calculateXP(crValue);
-    const pb = calculateProficiencyBonus(crValue);
+    let crValue = monsterData.cr || 'Unknown';
+    if (typeof crValue === 'object' && crValue !== null && crValue.cr) {
+        crValue = crValue.cr;
+    }
+    const xp = calculateXP(monsterData.cr);
+    const pb = calculateProficiencyBonus(monsterData.cr);
     const xpFormatted = xp.toLocaleString();
     cr.innerHTML = `<strong>CR</strong> ${crValue} (XP ${xpFormatted}, PB +${pb})`;
     container.appendChild(cr);

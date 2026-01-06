@@ -3,7 +3,7 @@
  * Loading, parsing, and transforming monster data
  */
 
-import { parseHitDice, rollHitPoints, rollInitiative, generateLabel } from './combat.js';
+import { parseHitDice, rollHitPoints, rollInitiative, generateLabel, calculateInitiativeModifier } from './combat.js';
 import { PATHS, ABILITY_SCORE_BASE, ABILITY_MOD_DIVISOR, DEFAULT_SPEED, DEFAULT_HP } from './constants.js';
 
 export function parseEnabledSources(content) {
@@ -132,7 +132,9 @@ export function transformSRDToCombatFormat(srdMonster) {
         "DEX_mod": dexModString,
         "Hit Points": hpString,
         "Armor Class": acValue,
-        "Speed": speedString
+        "Speed": speedString,
+        "Initiative_Proficiency": srdMonster.initiative?.proficiency || 0,
+        "CR": srdMonster.cr || "0"
     };
 }
 
@@ -144,7 +146,14 @@ export function calculateDexMod(dexScore) {
 export function processMonsterToCombat(monsterEntry, monsterData, startingLabelIndex, inCombat = false) {
     const initiativeEntries = [];
     const isGroupInit = monsterEntry.initiative === "group";
-    const groupInit = isGroupInit && inCombat ? rollInitiative(monsterData["DEX_mod"]) : null;
+
+    const initiativeMod = calculateInitiativeModifier(
+        monsterData["DEX_mod"],
+        monsterData["CR"],
+        monsterData["Initiative_Proficiency"]
+    );
+
+    const groupInit = isGroupInit && inCombat ? rollInitiative(initiativeMod) : null;
 
     for (let i = 0; i < monsterEntry.qty; i++) {
         const label = generateLabel(startingLabelIndex + i, isGroupInit);
@@ -159,7 +168,7 @@ export function processMonsterToCombat(monsterEntry, monsterData, startingLabelI
         }
 
         const initiative = inCombat
-            ? (groupInit !== null ? groupInit : rollInitiative(monsterData["DEX_mod"]))
+            ? (groupInit !== null ? groupInit : rollInitiative(initiativeMod))
             : 0;
 
         initiativeEntries.push({
