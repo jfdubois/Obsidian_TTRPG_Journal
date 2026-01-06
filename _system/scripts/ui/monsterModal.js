@@ -745,28 +745,35 @@ function createAbilityGrid(monsterData) {
     return table;
 }
 
+function parseSRDPlaceholders(text) {
+    if (!text) return '';
+
+    text = text.replace(/{@b ([^}]+)}/g, '<strong>$1</strong>');
+    text = text.replace(/{@i ([^}]+)}/g, '<em>$1</em>');
+
+    text = text.replace(/{@atk mw}/g, 'Melee Weapon Attack:');
+    text = text.replace(/{@atk rw}/g, 'Ranged Weapon Attack:');
+    text = text.replace(/{@atk ms}/g, 'Melee Spell Attack:');
+    text = text.replace(/{@atkr m}/g, 'Melee Attack Roll:');
+
+    text = text.replace(/{@hit ([^}]+)}/g, '<span style="color: var(--interactive-accent); font-weight: bold;">+$1</span>');
+    text = text.replace(/{@damage ([^}]+)}/g, '<span style="color: var(--text-accent);">$1</span>');
+    text = text.replace(/{@dice ([^}]+)}/g, '<span style="color: var(--text-accent);">$1</span>');
+    text = text.replace(/{@dc ([^}]+)}/g, '<span style="color: var(--interactive-accent); font-weight: bold;">DC $1</span>');
+
+    text = text.replace(/{@(?:creature|spell|item|skill|condition|status|book|variantrule) ([^|}]+)(?:\|[^}]+)?}/g, '<em>$1</em>');
+
+    text = text.replace(/{@h}/g, '');
+
+    return text;
+}
+
 function parseActionEntry(entries) {
     if (!entries) return 'No description available';
 
     let text = Array.isArray(entries) ? entries.join(' ') : String(entries);
 
-    text = text.replace(/\{@atk ([^}]+)\}/g, (match, content) => content);
-    text = text.replace(/\{@hit ([^}]+)\}/g, (match, bonus) =>
-        `<span style="color: var(--interactive-accent); font-weight: bold;">+${bonus}</span>`
-    );
-    text = text.replace(/\{@damage ([^}]+)\}/g, (match, dice) =>
-        `<span style="color: var(--text-accent);">${dice}</span>`
-    );
-    text = text.replace(/\{@dice ([^}]+)\}/g, (match, dice) =>
-        `<span style="color: var(--text-accent);">${dice}</span>`
-    );
-    text = text.replace(/\{@dc ([^}]+)\}/g, (match, dc) =>
-        `<span style="color: var(--interactive-accent); font-weight: bold;">DC ${dc}</span>`
-    );
-    text = text.replace(/\{@condition ([^}]+)\}/g, (match, condition) =>
-        `<em>${condition}</em>`
-    );
-    text = text.replace(/\{@(creature|spell|item) ([^}]+)\}/g, (match, type, name) => name);
+    text = parseSRDPlaceholders(text);
 
     text = text.replace(/(\d+d\d+(?:\s*[+\-]\s*\d+)?)/gi, (match) =>
         `<span style="color: var(--text-accent);">${match}</span>`
