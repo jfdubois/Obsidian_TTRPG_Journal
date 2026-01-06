@@ -25,12 +25,14 @@ const PLACEHOLDER_RULES_HTML = [
 	{ pattern: /{@atk ms}/g, replacement: 'Melee Spell Attack:' },
 	{ pattern: /{@atkr m}/g, replacement: 'Melee Attack Roll:' },
 
-	{ pattern: /{@hit ([^}]+)}/g, replacement: '<span style="color: var(--interactive-accent); font-weight: bold;">+$1</span>' },
+	{ pattern: /{@hit ([^}]+)}/g, replacement: '<span style="color: var(--text-accent);">$1</span>' },
 	{ pattern: /{@damage ([^}]+)}/g, replacement: '<span style="color: var(--text-accent);">$1</span>' },
 	{ pattern: /{@dice ([^}]+)}/g, replacement: '<span style="color: var(--text-accent);">$1</span>' },
-	{ pattern: /{@dc ([^}]+)}/g, replacement: '<span style="color: var(--interactive-accent); font-weight: bold;">DC $1</span>' },
+	{ pattern: /{@dc ([^}]+)}/g, replacement: 'DC $1' },
 
-	{ pattern: /{@(?:creature|spell|item|skill|condition|status|book|variantrule) ([^|}]+)(?:\|[^}]+)?}/g, replacement: '<em>$1</em>' },
+	{ pattern: /{@variantrule ([^|}]+)(?:\|[^}]+)?}/g, replacement: '<em>$1</em>' },
+
+	{ pattern: /{@(?:creature|spell|item|skill|condition|status|book) ([^|}]+)(?:\|[^}]+)?}/g, replacement: '<em>$1</em>' },
 
 	{ pattern: /{@h}/g, replacement: '' },
 ];

@@ -44,7 +44,7 @@ This file defines which SRD sources are enabled for monster selection in encount
 - **WBtW**: `enabled: false` - The Wild Beyond the Witchlight - Feywild adventure
 - **CRCotN**: `enabled: false` - Critical Role: Call of the Netherdeep - Exandria adventure
 - **DSotDQ**: `enabled: false` - Dragonlance: Shadow of the Dragon Queen - Dragonlance setting
-- **VEoR**: `enabled: false` - Vecna: Eve of Ruin - High-level multiverse adventure
+- **VEoR**: `enabled: true` - Vecna: Eve of Ruin - High-level multiverse adventure
 - **PaBTSO**: `enabled: false` - Phandelver and Below: The Shattered Obelisk - Expanded Phandelver
 
 ## Campaign Settings
@@ -74,7 +74,7 @@ This file defines which SRD sources are enabled for monster selection in encount
 
 ## Digital & Special Releases
 
-- **AI**: `enabled: false` - Acquisitions Incorporated - Corporate adventure setting
+- **AI**: `enabled: true` - Acquisitions Incorporated - Corporate adventure setting
 - **MGELFT**: `enabled: false` - Muk's Guide to Everything He Learned From Tasha
 - **AWM**: `enabled: false` - Adventure with Muk
 - **NF**: `enabled: false` - Nolzur's Marvelous Miniatures

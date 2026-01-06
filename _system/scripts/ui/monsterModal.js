@@ -546,7 +546,7 @@ function renderStatsTab(monsterData) {
         const senses = document.createElement('div');
         senses.style.marginBottom = '10px';
         const senseStr = Array.isArray(monsterData.senses) ? monsterData.senses.join(', ') : monsterData.senses;
-        senses.innerHTML = `<strong>Senses</strong> ${senseStr}`;
+        senses.innerHTML = `<strong>Senses</strong> ${parseSRDPlaceholders(senseStr)}`;
         container.appendChild(senses);
     }
 
@@ -756,12 +756,13 @@ function parseSRDPlaceholders(text) {
     text = text.replace(/{@atk ms}/g, 'Melee Spell Attack:');
     text = text.replace(/{@atkr m}/g, 'Melee Attack Roll:');
 
-    text = text.replace(/{@hit ([^}]+)}/g, '<span style="color: var(--interactive-accent); font-weight: bold;">+$1</span>');
+    text = text.replace(/{@hit ([^}]+)}/g, '<span style="color: var(--text-accent);">$1</span>');
     text = text.replace(/{@damage ([^}]+)}/g, '<span style="color: var(--text-accent);">$1</span>');
     text = text.replace(/{@dice ([^}]+)}/g, '<span style="color: var(--text-accent);">$1</span>');
-    text = text.replace(/{@dc ([^}]+)}/g, '<span style="color: var(--interactive-accent); font-weight: bold;">DC $1</span>');
+    text = text.replace(/{@dc ([^}]+)}/g, 'DC $1');
 
-    text = text.replace(/{@(?:creature|spell|item|skill|condition|status|book|variantrule) ([^|}]+)(?:\|[^}]+)?}/g, '<em>$1</em>');
+    text = text.replace(/{@variantrule ([^|}]+)(?:\|[^}]+)?}/g, '$1');
+    text = text.replace(/{@(?:creature|spell|item|skill|condition|status|book) ([^|}]+)(?:\|[^}]+)?}/g, '<em>$1</em>');
 
     text = text.replace(/{@h}/g, '');
 
