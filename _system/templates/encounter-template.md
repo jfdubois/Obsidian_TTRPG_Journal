@@ -22,35 +22,10 @@ combatLog: []
 const monsters = dv.current().monsters || [];
 const file = app.workspace.getActiveFile();
 
-async function loadMonsterModal() {
-    if (!window.showMonsterModal) {
-        try {
-            const modalFile = app.vault.getAbstractFileByPath("_system/scripts/ui/monsterModal.js");
-            if (!modalFile) {
-                throw new Error("monsterModal.js not found");
-            }
-            const modalCode = await app.vault.read(modalFile);
-
-            const wrappedCode = `
-                (function() {
-                    ${modalCode
-                        .replace(/export async function\s+(\w+)/g, 'window.$1 = async function')
-                        .replace(/export function\s+(\w+)/g, 'window.$1 = function')}
-                })();
-            `;
-
-            eval(wrappedCode);
-
-            if (!window.showMonsterModal) {
-                throw new Error("showMonsterModal not exported correctly");
-            }
-        } catch (error) {
-            console.error('Failed to load monster modal:', error);
-            new Notice('Failed to load monster modal. Check console for details.');
-            return null;
-        }
-    }
-    return window.showMonsterModal;
+function buildMonsterUrl(monsterName, source) {
+    const formattedName = monsterName.toLowerCase().replace(/[()'-]/g, '').replace(/\s+/g, '-');
+    const formattedSource = source.toLowerCase();
+    return `https://5e.tools/bestiary/${formattedName}-${formattedSource}.html`;
 }
 
 async function deleteMonster(index) {
@@ -82,20 +57,11 @@ if (monsters.length === 0) {
         statusCell.style.color = statusColor;
         statusCell.style.textAlign = "center";
         const nameCell = row.createEl("td");
-        const nameButton = nameCell.createEl("button", { text: monster.name });
-        nameButton.style.cursor = "pointer";
-        nameButton.style.backgroundColor = "transparent";
-        nameButton.style.border = "none";
-        nameButton.style.color = "var(--text-normal)";
-        nameButton.style.textDecoration = "underline";
-        nameButton.style.padding = "0";
-        nameButton.style.fontSize = "inherit";
-        nameButton.addEventListener("click", async () => {
-            const showModal = await loadMonsterModal();
-            if (showModal) {
-                await showModal(app, monster.name, monster.source);
-            }
-        });
+        const nameLink = nameCell.createEl("a", { text: monster.name });
+        nameLink.href = buildMonsterUrl(monster.name, monster.source);
+        nameLink.target = "_blank";
+        nameLink.style.color = "var(--text-normal)";
+        nameLink.style.textDecoration = "underline";
         row.createEl("td", { text: monster.qty });
         row.createEl("td", { text: monster.initiative });
         row.createEl("td", { text: monster.hpMode });

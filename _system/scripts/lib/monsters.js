@@ -186,3 +186,9 @@ export function processMonsterToCombat(monsterEntry, monsterData, startingLabelI
 
     return initiativeEntries;
 }
+
+export function buildMonsterUrl(monsterName, source) {
+    const formattedName = monsterName.toLowerCase().replace(/[()'-]/g, '').replace(/\s+/g, '-');
+    const formattedSource = source.toLowerCase();
+    return `https://5e.tools/bestiary/${formattedName}-${formattedSource}.html`;
+}
