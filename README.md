@@ -1,92 +1,219 @@
 # TTRPG-DEV
 
-An Obsidian vault for managing Tabletop Role-Playing Game (TTRPG) campaigns and worlds.
+An Obsidian vault for D&D 5e campaign management with automated combat tracking and 5etools SRD integration.
 
-## Overview
+Manage multiple campaigns, track sessions with auto-numbering, plan encounters with monster data from 100+ D&D sources, and run combat with initiative tracking, damage/healing application, and battle statistics.
 
-This vault provides a structured system for organizing TTRPG campaigns, including worlds, sessions, entities, and resources. It leverages Obsidian's note-taking capabilities along with plugins like Dataview, QuickAdd, and Templater to create an interactive campaign management tool.
+## Quick Start
 
-## Features
+### Prerequisites
 
-- **World Creation**: Easily create new worlds with predefined structures and DM role assignment
-- **Session Tracking**: Automated session numbering and recap integration
-- **Entity Management**: Templates for characters, locations, and other game elements
-- **Interactive Buttons**: Quick actions for adding sessions, entities, and maps
-- **Encounter Management**: Create encounters with initiative tracking capabilities
-- **Battle Logs**: Track damage and healing during combat encounters
-- **Dataview Integration**: Dynamic tables and views for campaign data
+- [Obsidian](https://obsidian.md/) installed
+- Git installed (for 5etools SRD data)
 
-## Structure
+### Setup
 
-- `Worlds/`: Contains individual world folders
-  - Each world has a `World.md` file with overview and actions
-  - `Ressources/` subfolder for media and assets
-- `_system/`: System files and templates
-  - `scripts/`: JavaScript automation scripts
-  - `templates/`: Note templates for consistent structure
-  - `media/`: Placeholder for system media
-  - `srd/`: Placeholder for external SRD data
+1. **Clone or download this vault** to your Obsidian vaults folder
 
-## Setup
+2. **Set up 5etools SRD data** (required for monster integration):
+   ```bash
+   cd _system/srd
+   git clone https://github.com/5etools-mirror-1/5etools-mirror-1.github.io.git 5etools-src
+   ```
 
-1. Clone or download this vault into your Obsidian vaults folder
-2. Clone the SRD 5etools repository for monster data:
-    ```bash
-    cd _system/srd
-    git clone https://github.com/5etools-mirror-1/5etools-mirror-1.github.io.git 5etools-src
-    ```
-3. Open the vault in Obsidian
-4. Install required plugins:
-    - Dataview
-    - QuickAdd
-    - Templater
-    - Buttons (optional, for enhanced UI)
-5. Configure QuickAdd macros:
-    - Import or create the "create-world" macro using `_system/scripts/createWorld.js`
-6. Configure Templater templates:
-    - Point Templater to the `_system/templates/` folder
-7. Configure monster sources:
-    - Edit `_system/srd/sources.md` to enable/disable SRD sources you want to use for encounters
+3. **Open the vault in Obsidian**
 
-## Usage
+4. **Install required community plugins:**
+   - Dataview
+   - JS Engine
+   - QuickAdd
+   - Templater
+   - ModalForms
+   - Buttons
 
-### Creating a New World
+   Optional plugins (recommended):
+   - Homepage
+   - Banners
+   - Leaflet (for maps)
+   - Custom Frames
+   - Style Settings
+
+5. **Enable community plugins** in Obsidian settings (Settings → Community Plugins → Turn on community plugins)
+
+6. **Verify setup:**
+   - Open `Worlds/TTRPG Game Index.md`
+   - Click "Create World" button
+   - Enter a test world name
+   - Success: You should see a new world folder and `World.md` file created with action buttons
+
+## Core Features
+
+- **Multi-Campaign Management**: Create separate worlds for each campaign with isolated data
+- **Auto-Numbered Sessions**: Sessions auto-increment (001, 002...) with automatic recap from previous session
+- **Entity System**: Create and link NPCs, locations, factions, quests, planes, and regions using wikilinks for relationship tracking
+- **Encounter Planning**: Auto-numbered encounters (E0001, E0002...) with monster selection from 5etools database
+- **5etools Integration**: Access 100+ D&D sources (Core Rulebooks, Adventure Modules, Campaign Settings) with external links to full stat blocks
+- **Combat Tracking**: Automated initiative order, damage/healing application, combat log with rounds, and battle statistics (damage dealt/taken, healing, kills)
+
+## Workflows
+
+### Creating Your First World
 
 1. Open `Worlds/TTRPG Game Index.md`
-2. Click the "Create World" button
-3. Enter the world name when prompted
-4. A new world folder and `World.md` file will be created
+2. Click "Create World"
+3. Enter world name
+4. Select role (DM or Player)
+5. Result: New world folder created with `World.md` hub containing action buttons and dataview queries
 
-### Adding Sessions
+### Managing Sessions
 
-From a world's `World.md` file, click "Add Session" to create a new session note with automatic numbering and recap from the previous session.
+1. Open your world's `World.md`
+2. Click "Add Session"
+3. Session note created with:
+   - Auto-incremented number (001, 002, 003...)
+   - Recap section with previous session summary
+   - Date and location fields
+   - Session notes area
 
-### Adding Entities
+### Creating Entities
 
-Use the "Add Entity" button to create new characters, locations, or other game elements using predefined templates.
+1. Click "Add Entity" button in `World.md`
+2. Choose entity type from ModalForms dialog:
+   - **NPC**: Character with occupation, race, faction
+   - **Place**: Location with ruler and region
+   - **Store**: Shop with owner and price point
+   - **Faction**: Organization with leader
+   - **Quest**: Quest with giver and status
+   - **Region**: Geographic area within a plane
+   - **Plane**: Planar realm (Material Plane, Feywild, etc.)
+3. Fill in details
+4. Entity created with wikilink relationships for backlinks and graph navigation
 
-### Creating Encounters
+### Planning Encounters
 
-From a world's `World.md` file, click "Create Encounter" to set up a new combat encounter with initiative tracking. The encounter will automatically generate an initiative order based on participant dexterity scores and allow for real-time initiative management during gameplay.
+1. Click "Create Encounter" in `World.md`
+2. Enter encounter description
+3. Click "Add Monsters":
+   - Search 5etools monster database
+   - Configure:
+     - **Quantity**: How many of this monster
+     - **Initiative Mode**: Individual (separate rolls) or Group (single roll for all)
+     - **HP Mode**: Rolled (random), Default (average), Max (maximum HP)
+4. Monsters display in table with clickable 5e.tools links for stat blocks
 
-### Managing Battle Logs
+### Running Combat
 
-During encounters, use the battle log functionality to track damage dealt and healing received by all participants. Battle logs provide a complete record of combat actions and can be reviewed or exported for session summaries.
+1. **Start Combat**: Click "Start Combat" in encounter
+   - Rolls initiative for all monsters
+   - Rolls HP based on HP mode
+   - Generates unique labels (A1, G1, G2, O1, etc.)
+   - Sorts by initiative descending
 
-## Templates
+2. **Add Players**: Click "Set Players Initiatives"
+   - Enter player name and initiative
+   - Repeat for all players
+   - Initiative order updates automatically
 
-- `new-session.md`: Creates numbered session notes with automatic recap
-- `new-entity.md`: Template for game entities (characters, locations, etc.)
-- `add-map.md`: Template for adding maps to worlds
-- `inline-combat.md`: Template for combat encounters
-- `encounter-initiative.md`: Template for encounters with initiative tracking
-- `battle-log.md`: Template for tracking damage and healing in combat
+3. **Combat Loop**:
+   - **Next Turn**: Advances current turn, increments round when needed
+   - **Apply Damage**: Select target → enter damage amount and type → HP and status updated
+   - **Apply Healing**: Select target → enter healing amount → HP restored (capped at max)
+   - Combat log auto-updates with all actions
 
-## Contributing
+4. **End Combat**: Click "End Combat" to mark encounter completed
 
-Feel free to modify templates and scripts to fit your specific TTRPG system or preferences.
+## Configuration
+
+### Monster Sources
+
+Edit `_system/srd/sources.md` to control which D&D sources are available in monster selection:
+
+```markdown
+- **MM**: enabled: true - Monster Manual
+- **VGM**: enabled: false - Volo's Guide to Monsters
+```
+
+**Categories:**
+- 2014 & 2024 Core Rulebooks (MM, DMG, PHB + updated versions)
+- Supplemental Books (VGM, MTF, MPMM, XGE, TCE, etc.)
+- Adventure Modules (CoS, SKT, ToA, BGDIA, etc.)
+- Campaign Settings (ERLW, GGR, MOT, VRGR, etc.)
+- Starter Sets, Anthologies, and Special Releases
+
+**Default**: Core rulebooks enabled, all others disabled (reduce clutter)
+
+Changes take effect immediately—no restart required.
+
+## File Structure
+
+```
+TTRPG-DEV/
+├── Worlds/                      # Campaign data (gitignored except index)
+│   ├── TTRPG Game Index.md      # Entry point with Create World button
+│   └── <WorldName>/             # Per-world folder
+│       ├── World.md             # World hub with buttons and queries
+│       ├── 001_YYYYMMDD.md      # Session notes (auto-numbered)
+│       ├── E0001_Name.md        # Encounters (auto-numbered)
+│       ├── EntityName.md        # NPCs, locations, factions, etc.
+│       └── Ressources/          # World-specific media
+├── _system/                     # System files (don't modify unless customizing)
+│   ├── scripts/                 # JavaScript automation
+│   │   ├── lib/                 # Core libraries (core, ui, combat, monsters)
+│   │   └── actions/             # User-triggered actions
+│   ├── templates/               # Note templates
+│   │   ├── new-session.md       # Session template
+│   │   ├── new-entity.md        # Entity creation with ModalForms
+│   │   └── encounter-template.md # Combat tracking interface
+│   ├── srd/                     # 5etools integration
+│   │   ├── sources.md           # Source configuration
+│   │   └── 5etools-src/         # Git submodule (cloned in setup)
+│   └── media/                   # System media files
+└── README.md                    # This file
+```
+
+## Tips & Troubleshooting
+
+### Tips
+
+- **Wikilinks**: Use `[[EntityName]]` to create bidirectional links—view relationships in graph view and backlinks panel
+- **Combat Log**: Auto-formats damage, healing, and reinforcements with round collapsing
+- **Encounter Reuse**: Duplicate encounter files to rerun the same battle with fresh initiative/HP rolls
+- **Source Control**: Enable only sources you use to reduce monster selection clutter
+- **Battle Statistics**: After combat, view damage dealt/taken, healing provided, and kills per combatant
+
+### Troubleshooting
+
+**"Add Monsters" shows no monsters**
+- Verify 5etools clone completed: Check `_system/srd/5etools-src/` contains data
+- Verify at least one source enabled in `_system/srd/sources.md`
+
+**Buttons not working**
+- Verify QuickAdd plugin enabled in Community Plugins
+- Check `.obsidian/plugins/quickadd/data.json` exists
+
+**Templates not applying**
+- Verify Templater plugin enabled
+- Check Templater settings: Template folder should be `_system/templates/`
+
+**Dataview queries not rendering**
+- Verify Dataview plugin enabled
+- Enable JavaScript queries: Settings → Dataview → Enable JavaScript Queries
+
+**5etools links broken**
+- Monster links point to `https://5e.tools/bestiary/`—requires internet connection
+- Verify monster name and source code match 5etools format
 
 ## Requirements
 
-- Obsidian.md
-- Community plugins: Dataview, QuickAdd, Templater
+- [Obsidian](https://obsidian.md/)
+- Git (for 5etools SRD clone)
+- **Community Plugins**:
+  - Dataview
+  - QuickAdd
+  - Templater
+  - ModalForms
+  - Buttons
+
+## Contributing
+
+This vault is designed for D&D 5e but can be adapted for other TTRPG systems. Modify templates and scripts in `_system/` to customize for your preferred game system.
