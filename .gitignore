@@ -16,6 +16,4 @@ _system/media/images/banners/*
 _system/srd/*
 !_system/srd/sources.md
 **/.git/
-.claude
-CLAUDE.local.md
 docs/*

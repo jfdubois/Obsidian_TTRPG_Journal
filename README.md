@@ -30,12 +30,11 @@ Manage multiple campaigns, track sessions with auto-numbering, plan encounters w
    - Templater
    - ModalForms
    - Buttons
+   - Banners
+   - Homepage
+    - Leaflet (for maps)
 
    Optional plugins (recommended):
-   - Homepage
-   - Banners
-   - Leaflet (for maps)
-   - Custom Frames
    - Style Settings
 
 5. **Enable community plugins** in Obsidian settings (Settings → Community Plugins → Turn on community plugins)
@@ -50,12 +49,12 @@ Manage multiple campaigns, track sessions with auto-numbering, plan encounters w
 
 - **Multi-Campaign Management**: Create separate worlds for each campaign with isolated data
 - **Auto-Numbered Sessions**: Sessions auto-increment (001, 002...) with automatic recap from previous session
-- **Entity System**: Create and link NPCs, locations, factions, quests, planes, and regions using wikilinks for relationship tracking
+- **Entity System**: Create and link NPCs, locations, factions, quests, planes, regions, etc... using wikilinks for relationship tracking
 - **Encounter Planning**: Auto-numbered encounters (E0001, E0002...) with monster selection from 5etools database
-- **5etools Integration**: Access 100+ D&D sources (Core Rulebooks, Adventure Modules, Campaign Settings) with external links to full stat blocks
+- **5etools Integration**: Access to monsters list by source books and view stats block from the official 5eTools website.
 - **Combat Tracking**: Automated initiative order, damage/healing application, combat log with rounds, and battle statistics (damage dealt/taken, healing, kills)
 
-## Workflows
+## Workflows for players
 
 ### Creating Your First World
 
@@ -63,7 +62,7 @@ Manage multiple campaigns, track sessions with auto-numbering, plan encounters w
 2. Click "Create World"
 3. Enter world name
 4. Select role (DM or Player)
-5. Result: New world folder created with `World.md` hub containing action buttons and dataview queries
+5. Result: New world folder created with `World.md` hub containing action buttons and entities knowledge base.
 
 ### Managing Sessions
 
@@ -77,6 +76,9 @@ Manage multiple campaigns, track sessions with auto-numbering, plan encounters w
 
 ### Creating Entities
 
+Two ways to create entities using the form:
+
+**From the `World.md` hub**
 1. Click "Add Entity" button in `World.md`
 2. Choose entity type from ModalForms dialog:
    - **NPC**: Character with occupation, race, faction
@@ -88,6 +90,11 @@ Manage multiple campaigns, track sessions with auto-numbering, plan encounters w
    - **Plane**: Planar realm (Material Plane, Feywild, etc.)
 3. Fill in details
 4. Entity created with wikilink relationships for backlinks and graph navigation
+
+**From a session note**
+You can click on a `[[ ]]` name during of after a session to lauch automatically the new entity form.
+
+## Workflows for DM
 
 ### Planning Encounters
 

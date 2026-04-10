@@ -61,26 +61,31 @@ function buildWorldHeader(worldName) {
 }
 
 function buildPlayersSection() {
-    let content = "```dataviewjs\n";
-    content += `const folder = dv.current().file.folder;\n`;
-    content += `const chars = dv.pages(\`"\${folder}"\`)\n`;
-    content += `  .where(p => p.type === "character" && p.playerName)\n`;
-    content += `  .sort(p => p.playerName, "asc");\n\n`;
-    content += `const byPlayer = {};\n`;
-    content += `for (const c of chars) {\n`;
-    content += `  if (!byPlayer[c.playerName]) byPlayer[c.playerName] = [];\n`;
-    content += `  byPlayer[c.playerName].push(c);\n`;
-    content += `}\n\n`;
-    content += `for (const [player, list] of Object.entries(byPlayer).sort()) {\n`;
-    content += `  dv.paragraph(\`**\${player}**\`);\n`;
-    content += `  for (const c of list) {\n`;
-    content += `    const info = \`\${c.file.link} · \${c.race ?? "?"} · \${c.class ?? "?"}\`;\n`;
-    content += `    const line = c.alive === false\n`;
-    content += `      ? \`- DEAD - ~~\${c.file.name} · \${c.race ?? "?"} · \${c.class ?? "?"}~~\`\n`;
-    content += `      : \`- \${info}\`;\n`;
-    content += `    dv.paragraph(line);\n`;
+    let content = `### Players\n`;
+    content += "```dataviewjs\n";
+    content += `(async () => {\n`;
+    content += `  const activeFile = app.workspace.getActiveFile();\n`;
+    content += `  if (!activeFile) return;\n`;
+    content += `  const folder = activeFile.parent.path;\n`;
+    content += `  const chars = dv.pages(\`"\${folder}"\`)\n`;
+    content += `    .where(p => p.type === "character" && p.playerName)\n`;
+    content += `    .sort(p => p.playerName, "asc");\n\n`;
+    content += `  const byPlayer = {};\n`;
+    content += `  for (const c of chars) {\n`;
+    content += `    if (!byPlayer[c.playerName]) byPlayer[c.playerName] = [];\n`;
+    content += `    byPlayer[c.playerName].push(c);\n`;
+    content += `  }\n\n`;
+    content += `  for (const [player, list] of Object.entries(byPlayer).sort()) {\n`;
+    content += `    dv.paragraph(\`**\${player}**\`);\n`;
+    content += `    for (const c of list) {\n`;
+    content += `      const info = \`\${c.file.link} · \${c.race ?? "?"} · \${c.class ?? "?"}\`;\n`;
+    content += `      const line = c.alive === false\n`;
+    content += `        ? \`- DEAD - ~~\${c.file.name} · \${c.race ?? "?"} · \${c.class ?? "?"}~~\`\n`;
+    content += `        : \`- \${info}\`;\n`;
+    content += `      dv.paragraph(line);\n`;
+    content += `    }\n`;
     content += `  }\n`;
-    content += `}\n`;
+    content += `})();\n`;
     content += "```\n\n";
     return content;
 }
