@@ -61,8 +61,27 @@ function buildWorldHeader(worldName) {
 }
 
 function buildPlayersSection() {
-    let content = `### Players\n\n`;
-    content += `- Player name as Character name\n\n`;
+    let content = "```dataviewjs\n";
+    content += `const folder = dv.current().file.folder;\n`;
+    content += `const chars = dv.pages(\`"\${folder}"\`)\n`;
+    content += `  .where(p => p.type === "character" && p.playerName)\n`;
+    content += `  .sort(p => p.playerName, "asc");\n\n`;
+    content += `const byPlayer = {};\n`;
+    content += `for (const c of chars) {\n`;
+    content += `  if (!byPlayer[c.playerName]) byPlayer[c.playerName] = [];\n`;
+    content += `  byPlayer[c.playerName].push(c);\n`;
+    content += `}\n\n`;
+    content += `for (const [player, list] of Object.entries(byPlayer).sort()) {\n`;
+    content += `  dv.paragraph(\`**\${player}**\`);\n`;
+    content += `  for (const c of list) {\n`;
+    content += `    const info = \`\${c.file.link} · \${c.race ?? "?"} · \${c.class ?? "?"}\`;\n`;
+    content += `    const line = c.alive === false\n`;
+    content += `      ? \`- DEAD - ~~\${c.file.name} · \${c.race ?? "?"} · \${c.class ?? "?"}~~\`\n`;
+    content += `      : \`- \${info}\`;\n`;
+    content += `    dv.paragraph(line);\n`;
+    content += `  }\n`;
+    content += `}\n`;
+    content += "```\n\n";
     return content;
 }
 

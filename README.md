@@ -1,4 +1,4 @@
-# TTRPG-DEV
+# TTRPG
 
 An Obsidian vault for D&D 5e campaign management with automated combat tracking and 5etools SRD integration.
 

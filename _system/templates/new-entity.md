@@ -40,12 +40,21 @@ try {
                 tR += `race: ${result.data.entityRace ? result.data.entityRace : ""}\n`
                 tR += `gender: ${result.data.entityGender ? result.data.entityGender : ""}\n`
                 tR += `class: ${result.data.entityClass ? result.data.entityClass : ""}\n`
+                tR += `alive: "true"\n`
                 tR += "---\n"
                 tR += `### NPC Introduction\n\n\n`
                 tR += `### Additional information\n\n\n`
                 break
             case "character":
+                tR += `faction: ${result.data.entityFaction ? `"[[${result.data.entityFaction}]]"` : ""}\n`
+                tR += `race: ${result.data.entityRace ? result.data.entityRace : ""}\n`
+                tR += `gender: ${result.data.entityGender ? result.data.entityGender : ""}\n`
+                tR += `class: ${result.data.entityClass ? result.data.entityClass : ""}\n`
+                tR += `playerName: ${result.data.entityPlayerName ? result.data.entityPlayerName : ""}\n`
+                tR += `alive: "true"\n`
                 tR += "---\n"
+                tR += `### PC Introduction\n\n\n`
+                tR += `### Additional information\n\n\n`
                 break
             case "place":
                 tR += `ruler: ${result.data.entityRuler ? `"[[${result.data.entityRuler}]]"` : ""}\n`

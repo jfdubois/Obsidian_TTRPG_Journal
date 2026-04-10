@@ -9,4 +9,16 @@ name Create World
 type command
 action QuickAdd: create-world
 ```
-^button-h5jv
+
+
+```dataview
+TABLE WITHOUT ID
+  link(file.path, world) as "World",
+  system as "System",
+  status as "Status"
+FROM 
+  "Worlds"
+WHERE
+  file.name = "World"
+SORT world ASC
+```
