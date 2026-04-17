@@ -1,4 +1,4 @@
-import { NOTE_TYPES, ENCOUNTER_STATUSES } from './constants.js';
+import { NOTE_TYPES, ENCOUNTER_STATUSES, PATHS } from './constants.js';
 
 /**
  * Get the currently active file in Obsidian
@@ -243,6 +243,84 @@ export async function openFile(app, filePath, newTab = false) {
 export function stripWikiLinks(text) {
     if (!text) return '';
     return text.replace(/\[\[|\]\]/g, '');
+}
+
+/**
+ * Build the canonical world folder path.
+ *
+ * @param {string} worldName - World name
+ * @returns {string} World folder path
+ */
+export function buildWorldPath(worldName) {
+    return `${PATHS.WORLDS_FOLDER}/${worldName}`;
+}
+
+/**
+ * Build the canonical campaign folder path.
+ *
+ * @param {string} worldName - World name
+ * @param {string} campaignName - Campaign name
+ * @returns {string} Campaign folder path
+ */
+export function buildCampaignPath(worldName, campaignName) {
+    return `${buildWorldPath(worldName)}/${campaignName}`;
+}
+
+/**
+ * Parse a folder path inside Worlds/ into world/campaign context.
+ *
+ * @param {string} folderPath - Folder path relative to vault root
+ * @returns {{worldName: string, campaignName: string|null, folderPath: string}|null}
+ */
+export function parseWorldPath(folderPath) {
+    const match = folderPath.match(/^Worlds\/([^/]+)(?:\/([^/]+))?$/);
+    if (!match) {
+        return null;
+    }
+
+    return {
+        worldName: match[1],
+        campaignName: match[2] || null,
+        folderPath
+    };
+}
+
+/**
+ * Get world/campaign context from the active file location.
+ *
+ * @param {Object} app - Obsidian app instance
+ * @returns {{file: Object, worldName: string, campaignName: string|null, folderPath: string}}
+ */
+export function getWorldContext(app) {
+    const file = getActiveFile(app);
+    const context = parseWorldPath(file.parent.path);
+
+    if (!context) {
+        throw new Error("Active file must be inside the Worlds folder structure");
+    }
+
+    return {
+        file,
+        ...context
+    };
+}
+
+/**
+ * Require the active file to be inside a campaign folder.
+ *
+ * @param {Object} app - Obsidian app instance
+ * @returns {{file: Object, worldName: string, campaignName: string, folderPath: string}}
+ */
+export function requireCampaignContext(app) {
+    const context = getWorldContext(app);
+    if (!context.campaignName) {
+        throw new Error("This action must be launched from a campaign note or a note inside a campaign folder");
+    }
+
+    return {
+        ...context,
+        campaignName: context.campaignName
+    };
 }
 
 /**

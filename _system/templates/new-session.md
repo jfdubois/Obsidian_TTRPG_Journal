@@ -1,7 +1,16 @@
 <%*
-/* === CONFIGURATION === */
+/* === CONTEXT === */
 const folder = tp.file.folder(true);
 const files = app.vault.getFiles().filter(f => f.parent.path === folder);
+const contextMatch = folder.match(/^Worlds\/([^/]+)(?:\/([^/]+))?$/);
+
+if (!contextMatch) {
+  new Notice("Sessions must be created inside Worlds/<World>/<Campaign>.");
+  return;
+}
+
+const currentWorld = contextMatch[1];
+const currentCampaign = contextMatch[2] || contextMatch[1];
 
 /* === HELPER: extract YAML from a file === */
 async function getYamlType(file) {
@@ -16,7 +25,6 @@ async function getYamlType(file) {
 /* === HELPER: extract content under a heading === */
 async function getHeadingContent(file, heading) {
   const content = await app.vault.read(file);
-  // Match the heading and capture content until next heading of same/higher level
   const regex = new RegExp(`###\\s*${heading}\\s*\\n([\\s\\S]*?)(?=\\n#{1,3}\\s|$)`, 'i');
   const match = content.match(regex);
   return match ? match[1].trim() : null;
@@ -52,8 +60,8 @@ await tp.file.rename(newFileName);
 /* === BUILD CONTENT === */
 tR += "---\n"
 tR += "type: session\n"
-tR += `campaign: ${tp.file.folder(false)}\n`
-tR += `world: ${tp.file.folder(false)}\n`
+tR += `campaign: ${currentCampaign}\n`
+tR += `world: ${currentWorld}\n`
 tR += `sessionNum: ${nextSessionNum}\n`
 tR += `summary: ""\n`
 tR += `location: \n`
@@ -64,17 +72,13 @@ tR += `# Session ${nextSessionNum}\n\n\n`
 tR += `### Session Summary\n\n\n`
 tR += `### Recap\n\n`
 
-// Insert only the text content from previous session's summary
 if (previousSessionFile) {
   const summaryContent = await getHeadingContent(previousSessionFile, "Session Summary");
   if (summaryContent) {
-    // Add link to previous session
-    if (previousSessionFile) {
-      tR += `← Previous: [[${previousSessionFile.basename}]]\n\n`;
-    }
+    tR += `← Previous: [[${previousSessionFile.basename}]]\n\n`;
     tR += `${summaryContent}\n\n\n`;
   } else {
-    tR += `*Previous session summary not found*\n\n\m`;
+    tR += `*Previous session summary not found*\n\n\n`;
   }
 } else {
   tR += `*No previous session found*\n\n\n`;

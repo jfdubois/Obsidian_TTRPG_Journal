@@ -1,6 +1,7 @@
 ---
 type: encounter
 world: {{worldName}}
+campaign: {{campaignName}}
 status: planned
 session:
 location:

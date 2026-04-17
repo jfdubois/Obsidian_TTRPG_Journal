@@ -6,18 +6,16 @@ export async function run(context) {
     const { app, quickAddApi } = context;
 
     try {
-        const activeFile = app.workspace.getActiveFile();
-        const worldName = activeFile.path.match(/Worlds\/([^\/]+)/)[1];
-        const worldFolder = `${PATHS.WORLDS_FOLDER}/${worldName}`;
+        const { worldName, campaignName, folderPath } = core.requireCampaignContext(app);
 
         const encounterName = await ui.promptForText(quickAddApi, "Encounter Name:");
         if (!encounterName) return;
 
         const existingEncounters = app.vault.getFiles()
-            .filter(f => f.path.includes(worldFolder) && f.basename.match(/^E\d{4}_/))
+            .filter(f => f.parent?.path === folderPath && f.basename.match(/^E\d{4}_/))
             .sort();
         const lastNum = existingEncounters.length > 0
-            ? parseInt(existingEncounters.last().basename.match(/E(\d{4})/)[1])
+            ? parseInt(existingEncounters.at(-1).basename.match(/E(\d{4})/)[1])
             : 0;
         const nextNum = String(lastNum + 1).padStart(4, '0');
         const fileName = `E${nextNum}_${encounterName.replace(/\s+/g, '_')}.md`;
@@ -33,10 +31,11 @@ export async function run(context) {
         let content = await app.vault.read(templateFile);
 
         content = content.replace(/{{worldName}}/g, worldName);
+        content = content.replace(/{{campaignName}}/g, campaignName);
         content = content.replace(/{{encounterName}}/g, encounterName);
         content = content.replace(/{{description}}/g, description || '');
 
-        const filePath = `${worldFolder}/${fileName}`;
+        const filePath = `${folderPath}/${fileName}`;
         await app.vault.create(filePath, content);
 
         await core.openFile(app, filePath, true);

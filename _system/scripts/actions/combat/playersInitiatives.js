@@ -12,14 +12,16 @@ export async function run(context) {
         core.requireNoteType(fm, NOTE_TYPES.ENCOUNTER);
 
         const world = fm.world;
-        if (!world) {
-            ui.notifyWarning("No world specified in encounter note!");
+        const campaign = fm.campaign;
+        if (!world || !campaign) {
+            ui.notifyWarning("Encounter note is missing world or campaign context!");
             return;
         }
 
         const result = await ui.showForm(app, 'addPlayerInitiatives', {
             values: {
-                entityWorld: world
+                entityWorld: world,
+                entityCampaign: campaign
             }
         });
 

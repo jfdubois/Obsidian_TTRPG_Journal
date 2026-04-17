@@ -18,6 +18,16 @@
           }
         },
         {
+          "name": "entityCampaign",
+          "label": "entityCampaign",
+          "description": "",
+          "isRequired": false,
+          "input": {
+            "type": "text",
+            "hidden": true
+          }
+        },
+        {
           "name": "entityType",
           "label": "Type",
           "description": "",
@@ -103,7 +113,7 @@
           "isRequired": false,
           "input": {
             "type": "dataview",
-            "query": "dv.pages()\n  .where(p => p.type === \"plane\" && p.world === form.entityWorld)\n  .map(p => p.file.name)"
+            "query": "dv.pages()\n  .where(p => p.type === \"plane\" && p.world === form.entityWorld && ((form.entityCampaign && p.campaign === form.entityCampaign) || (!form.entityCampaign && !p.campaign)))\n  .map(p => p.file.name)"
           }
         },
         {
@@ -113,7 +123,7 @@
           "isRequired": false,
           "input": {
             "type": "dataview",
-            "query": "dv.pages()\n  .where(p => p.type === \"region\" && p.world === form.entityWorld)\n  .map(p => p.file.name)"
+            "query": "dv.pages()\n  .where(p => p.type === \"region\" && p.world === form.entityWorld && ((form.entityCampaign && p.campaign === form.entityCampaign) || (!form.entityCampaign && !p.campaign)))\n  .map(p => p.file.name)"
           }
         },
         {
@@ -123,7 +133,7 @@
           "isRequired": false,
           "input": {
             "type": "dataview",
-            "query": "dv.pages()\n  .where(p => p.type === \"place\" && p.world === form.entityWorld)\n  .map(p => p.file.name)"
+            "query": "dv.pages()\n  .where(p => p.type === \"place\" && p.world === form.entityWorld && ((form.entityCampaign && p.campaign === form.entityCampaign) || (!form.entityCampaign && !p.campaign)))\n  .map(p => p.file.name)"
           }
         },
         {
@@ -153,7 +163,7 @@
           },
           "input": {
             "type": "dataview",
-            "query": "dv.pages()\n  .where(p => p.type === \"faction\" && p.world === form.entityWorld)\n  .map(p => p.file.name)"
+            "query": "dv.pages()\n  .where(p => p.type === \"faction\" && p.world === form.entityWorld && ((form.entityCampaign && p.campaign === form.entityCampaign) || (!form.entityCampaign && !p.campaign)))\n  .map(p => p.file.name)"
           }
         },
         {
@@ -168,7 +178,7 @@
           },
           "input": {
             "type": "dataview",
-            "query": "dv.pages()\n  .where(p => p.type === \"faction\" && p.world === form.entityWorld)\n  .map(p => p.file.name)"
+            "query": "dv.pages()\n  .where(p => p.type === \"faction\" && p.world === form.entityWorld && ((form.entityCampaign && p.campaign === form.entityCampaign) || (!form.entityCampaign && !p.campaign)))\n  .map(p => p.file.name)"
           }
         },
         {
@@ -301,7 +311,7 @@
           },
           "input": {
             "type": "dataview",
-            "query": "dv.pages()\n  .where(p => p.type === \"npc\" && p.world === form.entityWorld)\n  .map(p => p.file.name)"
+            "query": "dv.pages()\n  .where(p => p.type === \"npc\" && p.world === form.entityWorld && ((form.entityCampaign && p.campaign === form.entityCampaign) || (!form.entityCampaign && !p.campaign)))\n  .map(p => p.file.name)"
           }
         },
         {
@@ -316,7 +326,7 @@
           },
           "input": {
             "type": "dataview",
-            "query": "dv.pages()\n  .where(p => p.type === \"npc\" && p.world === form.entityWorld)\n  .map(p => p.file.name)"
+            "query": "dv.pages()\n  .where(p => p.type === \"npc\" && p.world === form.entityWorld && ((form.entityCampaign && p.campaign === form.entityCampaign) || (!form.entityCampaign && !p.campaign)))\n  .map(p => p.file.name)"
           }
         },
         {
@@ -331,7 +341,7 @@
           },
           "input": {
             "type": "dataview",
-            "query": "dv.pages()\n  .where(p => p.type === \"npc\" && p.world === form.entityWorld)\n  .map(p => p.file.name)"
+            "query": "dv.pages()\n  .where(p => p.type === \"npc\" && p.world === form.entityWorld && ((form.entityCampaign && p.campaign === form.entityCampaign) || (!form.entityCampaign && !p.campaign)))\n  .map(p => p.file.name)"
           }
         },
         {
@@ -346,7 +356,7 @@
           },
           "input": {
             "type": "dataview",
-            "query": "dv.pages()\n  .where(p => p.type === \"npc\" && p.world === form.entityWorld)\n  .map(p => p.file.name)"
+            "query": "dv.pages()\n  .where(p => p.type === \"npc\" && p.world === form.entityWorld && ((form.entityCampaign && p.campaign === form.entityCampaign) || (!form.entityCampaign && !p.campaign)))\n  .map(p => p.file.name)"
           }
         }
       ],
@@ -367,13 +377,23 @@
           }
         },
         {
+          "name": "entityCampaign",
+          "label": "Campaign",
+          "description": "",
+          "isRequired": false,
+          "input": {
+            "type": "text",
+            "hidden": true
+          }
+        },
+        {
           "name": "player1",
           "label": "Player 1 Name",
           "description": "",
           "isRequired": false,
           "input": {
             "type": "dataview",
-            "query": "dv.pages()\n  .where(p => p.type === \"character\" && p.world === form.entityWorld)\n  .map(p => p.file.name)"
+            "query": "dv.pages()\n  .where(p => p.type === \"character\" && p.world === form.entityWorld && p.campaign === form.entityCampaign)\n  .map(p => p.file.name)"
           }
         },
         {
@@ -393,7 +413,7 @@
           "isRequired": false,
           "input": {
             "type": "dataview",
-            "query": "dv.pages()\n  .where(p => p.type === \"character\" && p.world === form.entityWorld)\n  .map(p => p.file.name)"
+            "query": "dv.pages()\n  .where(p => p.type === \"character\" && p.world === form.entityWorld && p.campaign === form.entityCampaign)\n  .map(p => p.file.name)"
           }
         },
         {
@@ -413,7 +433,7 @@
           "isRequired": false,
           "input": {
             "type": "dataview",
-            "query": "dv.pages()\n  .where(p => p.type === \"character\" && p.world === form.entityWorld)\n  .map(p => p.file.name)"
+            "query": "dv.pages()\n  .where(p => p.type === \"character\" && p.world === form.entityWorld && p.campaign === form.entityCampaign)\n  .map(p => p.file.name)"
           }
         },
         {
@@ -433,7 +453,7 @@
           "isRequired": false,
           "input": {
             "type": "dataview",
-            "query": "dv.pages()\n  .where(p => p.type === \"character\" && p.world === form.entityWorld)\n  .map(p => p.file.name)"
+            "query": "dv.pages()\n  .where(p => p.type === \"character\" && p.world === form.entityWorld && p.campaign === form.entityCampaign)\n  .map(p => p.file.name)"
           }
         },
         {
@@ -453,7 +473,7 @@
           "isRequired": false,
           "input": {
             "type": "dataview",
-            "query": "dv.pages()\n  .where(p => p.type === \"character\" && p.world === form.entityWorld)\n  .map(p => p.file.name)"
+            "query": "dv.pages()\n  .where(p => p.type === \"character\" && p.world === form.entityWorld && p.campaign === form.entityCampaign)\n  .map(p => p.file.name)"
           }
         },
         {
@@ -473,7 +493,7 @@
           "isRequired": false,
           "input": {
             "type": "dataview",
-            "query": "dv.pages()\n  .where(p => p.type === \"character\" && p.world === form.entityWorld)\n  .map(p => p.file.name)"
+            "query": "dv.pages()\n  .where(p => p.type === \"character\" && p.world === form.entityWorld && p.campaign === form.entityCampaign)\n  .map(p => p.file.name)"
           }
         },
         {
@@ -493,7 +513,7 @@
           "isRequired": false,
           "input": {
             "type": "dataview",
-            "query": "dv.pages()\n  .where(p => p.type === \"character\" && p.world === form.entityWorld)\n  .map(p => p.file.name)"
+            "query": "dv.pages()\n  .where(p => p.type === \"character\" && p.world === form.entityWorld && p.campaign === form.entityCampaign)\n  .map(p => p.file.name)"
           }
         },
         {
@@ -513,7 +533,7 @@
           "isRequired": false,
           "input": {
             "type": "dataview",
-            "query": "dv.pages()\n  .where(p => p.type === \"character\" && p.world === form.entityWorld)\n  .map(p => p.file.name)"
+            "query": "dv.pages()\n  .where(p => p.type === \"character\" && p.world === form.entityWorld && p.campaign === form.entityCampaign)\n  .map(p => p.file.name)"
           }
         },
         {

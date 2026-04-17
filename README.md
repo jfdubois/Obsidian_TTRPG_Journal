@@ -42,15 +42,15 @@ Manage multiple campaigns, track sessions with auto-numbering, plan encounters w
 6. **Verify setup:**
    - Open `Worlds/TTRPG Game Index.md`
    - Click "Create World" button
-   - Enter a test world name
-   - Success: You should see a new world folder and `World.md` file created with action buttons
+   - Enter a test world name and an initial campaign name
+   - Success: You should see a new world folder with `World.md` plus a campaign subfolder containing `Campaign.md`
 
 ## Core Features
 
-- **Multi-Campaign Management**: Create separate worlds for each campaign with isolated data
+- **Shared World, Multiple Campaigns**: Keep one world reference with isolated campaign play spaces inside it
 - **Auto-Numbered Sessions**: Sessions auto-increment (001, 002...) with automatic recap from previous session
-- **Entity System**: Create and link NPCs, locations, factions, quests, planes, regions, etc... using wikilinks for relationship tracking
-- **Encounter Planning**: Auto-numbered encounters (E0001, E0002...) with monster selection from 5etools database
+- **Campaign Knowledge Isolation**: Characters, NPCs, places, factions, quests, and discoveries stay scoped to the active campaign
+- **Encounter Planning**: Auto-numbered encounters (E0001, E0002...) with monster selection from 5etools database, scoped per campaign
 - **5etools Integration**: Access to monsters list by source books and view stats block from the official 5eTools website.
 - **Combat Tracking**: Automated initiative order, damage/healing application, combat log with rounds, and battle statistics (damage dealt/taken, healing, kills)
 
@@ -62,11 +62,23 @@ Manage multiple campaigns, track sessions with auto-numbering, plan encounters w
 2. Click "Create World"
 3. Enter world name
 4. Select role (DM or Player)
-5. Result: New world folder created with `World.md` hub containing action buttons and entities knowledge base.
+5. Enter the initial campaign name
+6. Result:
+   - `World.md` is created as the shared world reference
+   - `Campaign.md` is created inside `Worlds/<WorldName>/<CampaignName>/`
+   - the campaign note becomes the main play hub for sessions, entities, and encounters
+
+### Creating Another Campaign
+
+1. Open `Worlds/TTRPG Game Index.md` or an existing `World.md`
+2. Click "Create Campaign" or "Add Campaign"
+3. Select the world if needed
+4. Enter campaign name and optional timeline notes
+5. Result: A new `Campaign.md` hub is created in its own campaign folder
 
 ### Managing Sessions
 
-1. Open your world's `World.md`
+1. Open your campaign's `Campaign.md`
 2. Click "Add Session"
 3. Session note created with:
    - Auto-incremented number (001, 002, 003...)
@@ -78,8 +90,8 @@ Manage multiple campaigns, track sessions with auto-numbering, plan encounters w
 
 Two ways to create entities using the form:
 
-**From the `World.md` hub**
-1. Click "Add Entity" button in `World.md`
+**From the `Campaign.md` hub**
+1. Click "Add Entity" button in `Campaign.md`
 2. Choose entity type from ModalForms dialog:
    - **NPC**: Character with occupation, race, faction
    - **Place**: Location with ruler and region
@@ -89,7 +101,7 @@ Two ways to create entities using the form:
    - **Region**: Geographic area within a plane
    - **Plane**: Planar realm (Material Plane, Feywild, etc.)
 3. Fill in details
-4. Entity created with wikilink relationships for backlinks and graph navigation
+4. Entity created inside the current campaign folder with wikilink relationships for backlinks and graph navigation
 
 **From a session note**
 You can click on a `[[ ]]` name during of after a session to lauch automatically the new entity form.
@@ -98,7 +110,7 @@ You can click on a `[[ ]]` name during of after a session to lauch automatically
 
 ### Planning Encounters
 
-1. Click "Create Encounter" in `World.md`
+1. Click "Create Encounter" in `Campaign.md`
 2. Enter encounter description
 3. Click "Add Monsters":
    - Search 5etools monster database
@@ -158,11 +170,14 @@ TTRPG-DEV/
 ├── Worlds/                      # Campaign data (gitignored except index)
 │   ├── TTRPG Game Index.md      # Entry point with Create World button
 │   └── <WorldName>/             # Per-world folder
-│       ├── World.md             # World hub with buttons and queries
-│       ├── 001_YYYYMMDD.md      # Session notes (auto-numbered)
-│       ├── E0001_Name.md        # Encounters (auto-numbered)
-│       ├── EntityName.md        # NPCs, locations, factions, etc.
-│       └── Ressources/          # World-specific media
+│       ├── World.md             # Shared world reference
+│       ├── Ressources/          # World-specific media
+│       └── <CampaignName>/      # Campaign-specific play space
+│           ├── Campaign.md      # Campaign hub with buttons and queries
+│           ├── 001_YYYYMMDD.md  # Session notes (auto-numbered)
+│           ├── E0001_Name.md    # Encounters (auto-numbered)
+│           ├── EntityName.md    # NPCs, locations, factions, etc.
+│           └── Ressources/      # Campaign-specific media
 ├── _system/                     # System files (don't modify unless customizing)
 │   ├── scripts/                 # JavaScript automation
 │   │   ├── lib/                 # Core libraries (core, ui, combat, monsters)

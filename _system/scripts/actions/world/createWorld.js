@@ -1,6 +1,7 @@
 import * as core from '../../lib/core.js';
 import * as ui from '../../lib/ui.js';
-import { PATHS } from '../../lib/constants.js';
+import { NOTE_TYPES } from '../../lib/constants.js';
+import { createCampaignStructure } from '../campaign/createCampaign.js';
 
 export async function run(context) {
     const { app, quickAddApi } = context;
@@ -16,28 +17,35 @@ export async function run(context) {
         const role = await ui.selectOption(quickAddApi, roleOptions, "Select your role in this world:");
         if (!role) return;
 
-        const folderPath = `${PATHS.WORLDS_FOLDER}/${worldName}`;
+        const initialCampaignName = await ui.promptForText(quickAddApi, "Initial campaign name:", worldName);
+        if (!initialCampaignName) return;
+
+        const folderPath = core.buildWorldPath(worldName);
+        const worldFilePath = `${folderPath}/World.md`;
+
+        if (app.vault.getAbstractFileByPath(worldFilePath)) {
+            throw new Error(`World "${worldName}" already exists`);
+        }
+
         await app.vault.createFolder(folderPath).catch(() => {});
         await app.vault.createFolder(`${folderPath}/Ressources`).catch(() => {});
 
         let fileContent = buildWorldFrontmatter(worldName, role);
         fileContent += buildWorldHeader(worldName);
-        fileContent += buildPlayersSection();
-        fileContent += buildActionsSection(role);
-        fileContent += buildSessionsSection(folderPath);
-        fileContent += buildWorldKnowledgeSection(worldName);
+        fileContent += buildActionsSection();
+        fileContent += buildCampaignsSection(folderPath);
+        fileContent += buildWorldKnowledgeSection(folderPath);
 
-        if (role === "dm") {
-            fileContent += buildDmEncountersSection(folderPath);
-        }
+        await app.vault.create(worldFilePath, fileContent);
 
-        const filePath = `${folderPath}/World.md`;
-        await app.vault.create(filePath, fileContent);
+        const campaignFilePath = await createCampaignStructure(app, {
+            worldName,
+            campaignName: initialCampaignName,
+            role
+        });
 
-        await core.openFile(app, filePath, false);
-
-        ui.notifySuccess(`World "${worldName}" created successfully!`);
-
+        await core.openFile(app, campaignFilePath, false);
+        ui.notifySuccess(`World "${worldName}" created with campaign "${initialCampaignName}"!`);
     } catch (error) {
         core.handleActionError("createWorld", error);
     }
@@ -45,137 +53,50 @@ export async function run(context) {
 
 function buildWorldFrontmatter(worldName, role) {
     let content = "---\n";
+    content += `type: ${NOTE_TYPES.WORLD}\n`;
     content += `world: ${worldName}\n`;
-    content += `campaign: ${worldName}\n`;
     content += `status: active\n`;
     content += `role: ${role}\n`;
-    content += `type: world\n`;
-    content += `system: \n`;
-    content += `banner: "![[world-banner.jpg]]"\n`;
+    content += "system: \n";
+    content += 'banner: "![[world-banner.jpg]]"\n';
     content += "---\n";
     return content;
 }
 
 function buildWorldHeader(worldName) {
-    return `# The world of ${worldName}\n\n`;
-}
-
-function buildPlayersSection() {
-    let content = `### Players\n`;
-    content += "```dataviewjs\n";
-    content += `(async () => {\n`;
-    content += `  const activeFile = app.workspace.getActiveFile();\n`;
-    content += `  if (!activeFile) return;\n`;
-    content += `  const folder = activeFile.parent.path;\n`;
-    content += `  const chars = dv.pages(\`"\${folder}"\`)\n`;
-    content += `    .where(p => p.type === "character" && p.playerName)\n`;
-    content += `    .sort(p => p.playerName, "asc");\n\n`;
-    content += `  const byPlayer = {};\n`;
-    content += `  for (const c of chars) {\n`;
-    content += `    if (!byPlayer[c.playerName]) byPlayer[c.playerName] = [];\n`;
-    content += `    byPlayer[c.playerName].push(c);\n`;
-    content += `  }\n\n`;
-    content += `  for (const [player, list] of Object.entries(byPlayer).sort()) {\n`;
-    content += `    dv.paragraph(\`**\${player}**\`);\n`;
-    content += `    for (const c of list) {\n`;
-    content += `      const info = \`\${c.file.link} · \${c.race ?? "?"} · \${c.class ?? "?"}\`;\n`;
-    content += `      const line = c.alive === false\n`;
-    content += `        ? \`- DEAD - ~~\${c.file.name} · \${c.race ?? "?"} · \${c.class ?? "?"}~~\`\n`;
-    content += `        : \`- \${info}\`;\n`;
-    content += `      dv.paragraph(line);\n`;
-    content += `    }\n`;
-    content += `  }\n`;
-    content += `})();\n`;
-    content += "```\n\n";
+    let content = `# The world of ${worldName}\n\n`;
+    content += "## World Notes\n\n";
     return content;
 }
 
-function buildActionsSection(role) {
-    let content = `### Actions\n\n`;
-
+function buildActionsSection() {
+    let content = "### Actions\n\n";
     content += "```button\n";
-    content += "name Add Session\n";
+    content += "name Add Campaign\n";
     content += "type command\n";
-    content += "action QuickAdd: create-session\n";
-    content += "```\n";
-
-    content += "```button\n";
-    content += "name Add Entity\n";
-    content += "type command\n";
-    content += "action Templater: Create new-entity\n";
-    content += "```\n";
-
-    if (role === "dm") {
-        content += "```button\n";
-        content += "name Create Encounter\n";
-        content += "type command\n";
-        content += "action QuickAdd: create-encounter\n";
-        content += "```\n\n";
-    }
-
-    return content;
-}
-
-function buildSessionsSection(folderPath) {
-    let content = `### Sessions\n\n`;
-    content += "```dataview\n";
-    content += `TABLE WITHOUT ID link(file.name) as "Session", summary as "Summary"\n`;
-    content += `FROM "${folderPath}"\n`;
-    content += `WHERE contains(type, "session")\n`;
-    content += `SORT file.name ASC\n`;
+    content += "action QuickAdd: create-campaign\n";
     content += "```\n\n";
     return content;
 }
 
-function buildWorldKnowledgeSection(worldName) {
-    let content = `### World knowledge\n\n`;
-    content += "```base\n";
-    content += `views:\n`;
-    content += `  - type: table\n`;
-    content += `    name: WorldView\n`;
-    content += `    filters:\n`;
-    content += `      and:\n`;
-    content += `        - world == "${worldName}"\n`;
-    content += `        - file.name != "World"\n`;
-    content += `        - '!type.contains("session")'\n`;
-    content += `    order:\n`;
-    content += `      - file.name\n`;
-    content += `      - plane\n`;
-    content += `      - region\n`;
-    content += `      - location\n`;
-    content += `      - type\n`;
-    content += `      - description\n`;
-    content += `    columnSize:\n`;
-    content += `      note.type: 93\n`;
-    content += "```\n";
+function buildCampaignsSection(folderPath) {
+    let content = "### Campaigns\n\n";
+    content += "```dataview\n";
+    content += 'TABLE WITHOUT ID link(file.path, campaign) as "Campaign", timelineNotes as "Timeline", status as "Status"\n';
+    content += `FROM "${folderPath}"\n`;
+    content += 'WHERE type = "campaign"\n';
+    content += "SORT campaign ASC\n";
+    content += "```\n\n";
     return content;
 }
 
-function buildDmEncountersSection(folderPath) {
-    let content = `\n### DM: Encounters\n\n`;
-
-    content += `#### Active Encounters\n`;
+function buildWorldKnowledgeSection(folderPath) {
+    let content = "### World knowledge\n\n";
     content += "```dataview\n";
-    content += `TABLE \n`;
-    content += `  session as "Session",\n`;
-    content += `  location as "Location",\n`;
-    content += `  length(monsters) as "Types"\n`;
+    content += 'TABLE file.link as "Note", type as "Type", description as "Description"\n';
     content += `FROM "${folderPath}"\n`;
-    content += `WHERE type = "encounter" AND status = "active"\n`;
-    content += `SORT file.ctime DESC\n`;
-    content += "```\n\n";
-
-    content += `#### Recent Completed\n`;
-    content += "```dataview\n";
-    content += `TABLE \n`;
-    content += `  session as "Session",\n`;
-    content += `  location as "Location",\n`;
-    content += `  date-completed as "Date"\n`;
-    content += `FROM "${folderPath}"\n`;
-    content += `WHERE type = "encounter" AND status = "completed"\n`;
-    content += `SORT date-completed DESC\n`;
-    content += `LIMIT 5\n`;
+    content += `WHERE file.folder = "${folderPath}" AND file.name != "World"\n`;
+    content += "SORT file.name ASC\n";
     content += "```\n";
-
     return content;
 }

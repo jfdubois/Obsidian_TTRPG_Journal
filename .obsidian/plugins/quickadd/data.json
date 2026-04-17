@@ -25,10 +25,10 @@
                 "format": "temp note"
               },
               "folder": {
-                "enabled": false,
+                "enabled": true,
                 "folders": [],
                 "chooseWhenCreatingNote": false,
-                "createInSameFolderAsActiveFile": false,
+                "createInSameFolderAsActiveFile": true,
                 "chooseFromSubfolders": false
               },
               "appendLink": false,
@@ -241,6 +241,26 @@
             "type": "UserScript",
             "id": "107e11f5-2cd7-49f4-94eb-b716be3f0f53",
             "path": "_system/scripts/quickadd/createWorld.js",
+            "settings": {}
+          }
+        ]
+      }
+    },
+    {
+      "id": "d441cb43-9e27-4dd3-bf60-4d0794fb6cb8",
+      "name": "create-campaign",
+      "type": "Macro",
+      "command": true,
+      "runOnStartup": false,
+      "macro": {
+        "name": "create-campaign",
+        "id": "76af761b-f6f8-4fa3-81b9-efdf6d6d045e",
+        "commands": [
+          {
+            "name": "createCampaign",
+            "type": "UserScript",
+            "id": "d90f5bf7-d6e9-4c5a-b90b-5fbef286ff55",
+            "path": "_system/scripts/quickadd/createCampaign.js",
             "settings": {}
           }
         ]

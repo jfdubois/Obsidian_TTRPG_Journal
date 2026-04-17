@@ -20,9 +20,16 @@ export const PATHS = {
 export const NOTE_TYPES = {
     ENCOUNTER: 'encounter',
     WORLD: 'world',
+    CAMPAIGN: 'campaign',
     SESSION: 'session',
+    CHARACTER: 'character',
     NPC: 'npc',
-    PLACE: 'place'
+    PLACE: 'place',
+    STORE: 'store',
+    FACTION: 'faction',
+    REGION: 'region',
+    PLANE: 'plane',
+    QUEST: 'quest'
 };
 
 export const ENCOUNTER_STATUSES = {
