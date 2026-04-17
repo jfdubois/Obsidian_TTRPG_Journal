@@ -1,8 +1,41 @@
 <%*
 const formName = "newEntity"
 const currentWorld = tp.file.folder(false)
+const currentFolderPath = tp.file.folder(true)
+const currentFilePath = tp.file.path(true)
 const folderPath = "Worlds/" + currentWorld
 const modalForm = app.plugins.plugins.modalforms.api
+
+function getFrontmatterType(file) {
+    const type = app.metadataCache.getFileCache(file)?.frontmatter?.type
+    return typeof type === "string" ? type.toLowerCase() : ""
+}
+
+function isSessionFile(file) {
+    if (!file || file.extension !== "md") {
+        return false
+    }
+
+    return getFrontmatterType(file) === "session" || /^\d{3}_\d{8}$/.test(file.basename)
+}
+
+function getDetectedSourceSession() {
+    const lastFiles = tp.app.workspace.getLastOpenFiles?.() ?? []
+    for (const filePath of lastFiles) {
+        if (!filePath || filePath === currentFilePath) {
+            continue
+        }
+
+        const candidate = app.vault.getAbstractFileByPath(filePath)
+        if (candidate?.parent?.path === currentFolderPath && isSessionFile(candidate)) {
+            return candidate.basename
+        }
+    }
+
+    return ""
+}
+
+const detectedSourceSession = getDetectedSourceSession()
 
 let fileName = tp.file.title
 if (fileName === "Untitled") {
@@ -31,6 +64,7 @@ try {
         tR += `region: ${result.data.entityRegion ? `"[[${result.data.entityRegion}]]"` : ""}\n`
         tR += `location: ${result.data.entityLocation ? `"[[${result.data.entityLocation}]]"` : ""}\n`
         tR += `description: ${result.data.entityDescription ? result.data.entityDescription : ""}\n`
+        tR += `introducedIn: ${detectedSourceSession ? `"[[${detectedSourceSession}]]"` : ""}\n`
         
         const entityType = result.data.entityType
         switch(entityType) {
