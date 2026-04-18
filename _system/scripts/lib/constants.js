@@ -13,7 +13,11 @@ export const PATHS = {
     SRD_BESTIARY: "_system/srd/5etools-src/data/bestiary",
     SRD_SOURCES: "_system/srd/sources.md",
     WORLDS_FOLDER: "Worlds",
-    TEMPLATES_FOLDER: "_system/templates"
+    TEMPLATES_FOLDER: "_system/templates",
+    MIGRATIONS_ROOT_FOLDER: "_system/migrations",
+    LEGACY_IMPORTS_FOLDER: "_system/migrations/_import/legacy-worlds",
+    MIGRATION_REPORTS_FOLDER: "_system/migrations/reports",
+    MIGRATION_SCHEMA_FILE: "_system/migrations/schema.json"
 };
 
 // Note types and statuses
@@ -37,6 +41,9 @@ export const ENCOUNTER_STATUSES = {
     IN_COMBAT: 'inCombat',
     COMPLETED: 'completed'
 };
+
+// Schema versioning
+export const TTRPG_SCHEMA_VERSION = 2;
 
 // UI delays
 export const DELAYS = {

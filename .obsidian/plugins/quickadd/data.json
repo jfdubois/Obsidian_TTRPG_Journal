@@ -265,6 +265,46 @@
           }
         ]
       }
+    },
+    {
+      "id": "ec5ef5aa-04a4-49d3-a5e8-15779dfd6050",
+      "name": "prepare-legacy-world-import",
+      "type": "Macro",
+      "command": true,
+      "runOnStartup": false,
+      "macro": {
+        "name": "prepare-legacy-world-import",
+        "id": "5161ea2e-34d0-48d1-b495-ed00a0a76345",
+        "commands": [
+          {
+            "name": "prepareLegacyWorldImport",
+            "type": "UserScript",
+            "id": "9aa7e538-a1ef-4ce6-92f5-8c99a797f29f",
+            "path": "_system/scripts/quickadd/prepareLegacyWorldImport.js",
+            "settings": {}
+          }
+        ]
+      }
+    },
+    {
+      "id": "7f2b7e13-75f0-4b18-9cd2-7a7f7c6d4f11",
+      "name": "migrate-legacy-world",
+      "type": "Macro",
+      "command": true,
+      "runOnStartup": false,
+      "macro": {
+        "name": "migrate-legacy-world",
+        "id": "4ea1e970-3775-4f93-9d4b-b08c2794f6e8",
+        "commands": [
+          {
+            "name": "migrateLegacyWorld",
+            "type": "UserScript",
+            "id": "6213ae1f-a6e2-4485-8a23-2e9da0d5cc7d",
+            "path": "_system/scripts/quickadd/migrateLegacyWorld.js",
+            "settings": {}
+          }
+        ]
+      }
     }
   ],
   "inputPrompt": "single-line",

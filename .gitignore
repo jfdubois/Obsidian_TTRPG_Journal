@@ -15,5 +15,9 @@ _system/media/images/banners/*
 !_system/media/images/banners/.gitkeep
 _system/srd/*
 !_system/srd/sources.md
+_system/migrations/_import/legacy-worlds/*
+!_system/migrations/_import/legacy-worlds/.gitkeep
+_system/migrations/reports/*
+!_system/migrations/reports/.gitkeep
 **/.git/
 .private/

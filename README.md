@@ -15,7 +15,7 @@ Active development. The vault is already usable, but the workflow is still evolv
 - Campaign-scoped entities such as NPCs, places, factions, quests, regions, and planes
 - Encounter creation with monster import from configured 5etools sources
 - Combat workflow with initiative, HP tracking, logging, and end-of-battle summary data
-- Migration tooling for older world structures
+- Obsidian-native migration tooling for older world structures
 
 ## Requirements
 
@@ -98,6 +98,18 @@ You can create structured entities in two ways:
 3. Start combat to roll initiative and generate combatants.
 4. Use the combat actions to advance turns, apply damage, apply healing, and close the battle.
 
+### Migrate a legacy world
+
+1. Place the legacy world folder in `_system/migrations/_import/legacy-worlds/`.
+2. If the old notes use pasted images from the vault attachment folder, run `QuickAdd: prepare-legacy-world-import` first.
+3. Review the generated prep report and confirm staged notes now link to local `Ressources/` files.
+4. Run `QuickAdd: migrate-legacy-world`.
+5. Choose the source world, target world, target campaign, role, and mode.
+6. Start with `Dry Run` and review the generated migration report.
+7. Run `Apply Migration` once the report looks correct.
+
+The migration flow is designed to keep staged source files in place and write reports to `_system/migrations/reports/`.
+
 ## Configuration
 
 ### Monster sources
@@ -124,6 +136,11 @@ By default, core rulebooks are enabled and the rest are disabled to keep the sel
 
 ```text
 TTRPG-DEV/
+├── _system/migrations/          # Migration schema, staged imports, and reports
+│   ├── _import/
+│   │   └── legacy-worlds/
+│   ├── reports/
+│   └── schema.json
 ├── Worlds/                      # Campaign data (gitignored except index)
 │   ├── TTRPG Game Index.md
 │   └── <WorldName>/
@@ -135,7 +152,7 @@ TTRPG-DEV/
 │           ├── E0001_Name.md
 │           ├── EntityName.md
 │           └── Ressources/
-├── _system/                     # Templates, scripts, and system assets
+├── _system/                     # Templates, scripts, migration logic, and system assets
 ├── docs/                        # Project process and SOP documentation
 ├── tools/                       # Utility scripts such as migrations
 ├── CHANGELOG.md

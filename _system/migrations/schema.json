@@ -1,0 +1,12 @@
+{
+  "currentSchemaVersion": 2,
+  "supportedSourceVersions": [
+    "pre-versioned",
+    2
+  ],
+  "firstSeparatedRelease": "0.2.0",
+  "notes": [
+    "Schema version 2 is the first world/campaign-separated baseline.",
+    "Legacy flat worlds from before tag 0.1.0 to 0.1.x should be detected as pre-versioned."
+  ]
+}

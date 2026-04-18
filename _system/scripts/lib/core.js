@@ -227,8 +227,36 @@ export async function openFile(app, filePath, newTab = false) {
     if (!file) {
         throw new Error(`File not found: ${filePath}`);
     }
+    await waitForFileCache(app, file);
     const leafType = newTab ? 'tab' : undefined;
     await app.workspace.getLeaf(leafType).openFile(file);
+}
+
+/**
+ * Wait until Obsidian has created a metadata cache entry for a file.
+ * This helps plugins that assume getFileCache(file) is non-null as soon as
+ * a note is opened after creation.
+ *
+ * @param {Object} app - Obsidian app instance
+ * @param {Object} file - File to wait on
+ * @param {Object} options - Timing options
+ * @param {number} options.timeoutMs - Max time to wait in milliseconds
+ * @param {number} options.pollMs - Poll interval in milliseconds
+ * @returns {Promise<boolean>} True when cache exists, false on timeout
+ */
+export async function waitForFileCache(app, file, { timeoutMs = 1500, pollMs = 50 } = {}) {
+    const startedAt = Date.now();
+    while ((Date.now() - startedAt) < timeoutMs) {
+        if (app.metadataCache.getFileCache(file)) {
+            return true;
+        }
+        await sleep(pollMs);
+    }
+    return false;
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 /**

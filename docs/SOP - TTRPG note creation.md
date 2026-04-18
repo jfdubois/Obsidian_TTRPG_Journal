@@ -9,6 +9,7 @@ This document describes the current note-creation process used in this vault for
 - creating a new session inside a campaign
 - creating a new entity from a campaign note
 - creating a new entity from a session note
+- migrating a legacy pre-separation world into the current structure
 
 It is an operational reference for understanding which plugin is involved, what launches the workflow, and which note structure is produced.
 
@@ -36,6 +37,9 @@ This SOP covers the current vault behavior implemented through:
 - `_system/scripts/actions/world/createWorld.js`
 - `_system/scripts/actions/campaign/createCampaign.js`
 - `_system/scripts/actions/encounter/createEncounter.js`
+- `_system/scripts/actions/migration/migrateLegacyWorld.js`
+- `_system/scripts/builders/worldBuilder.js`
+- `_system/scripts/builders/campaignBuilder.js`
 - `.obsidian/plugins/quickadd/data.json`
 - `.obsidian/plugins/templater-obsidian/data.json`
 - `.obsidian/plugins/modalforms/data.json`
@@ -53,6 +57,7 @@ The note-creation system is split across two creation engines:
    - campaign creation
    - session creation
    - encounter creation
+   - legacy world migration
 
 2. `Templater`
    Used for file-template execution when a new note is created.
@@ -132,6 +137,75 @@ The active entry points are:
 
 6. Entity creation from a session note
    Creating a new note from an unresolved wikilink inside a campaign/session context triggers the entity template flow.
+
+7. Legacy world migration
+   `QuickAdd: prepare-legacy-world-import` stages pasted-image attachments into the legacy world folder, and `QuickAdd: migrate-legacy-world` runs the migration itself.
+
+## SOP: Legacy World Migration
+
+### Trigger
+
+The process starts from a staged legacy world folder inside `_system/migrations/_import/legacy-worlds/`.
+
+The active launcher is:
+
+- `QuickAdd: prepare-legacy-world-import`
+- `QuickAdd: migrate-legacy-world`
+
+The trigger chain is:
+
+- `QuickAdd`
+- QuickAdd user script: `_system/scripts/quickadd/prepareLegacyWorldImport.js`
+- `JS Engine` import of `_system/scripts/actions/migration/prepareLegacyWorldImport.js`
+- `QuickAdd`
+- QuickAdd user script: `_system/scripts/quickadd/migrateLegacyWorld.js`
+- `JS Engine` import of `_system/scripts/actions/migration/migrateLegacyWorld.js`
+
+### Plugin Sequence
+
+1. The user places a legacy world folder in `_system/migrations/_import/legacy-worlds/`.
+2. If the staged notes reference pasted images that live in the vault attachment folder, the user runs `QuickAdd: prepare-legacy-world-import`.
+3. The prep action:
+   - copies linked assets into `<LegacyWorld>/Ressources/`
+   - rewrites staged note embeds to `Ressources/...`
+   - writes a prep report
+4. `QuickAdd` prompts for:
+   - source world
+   - target world
+   - target campaign
+   - role
+   - timeline notes
+   - mode: `Dry Run` or `Apply Migration`
+5. The migration action scans the staged world.
+6. The action builds a migration plan against the current schema baseline.
+7. In dry-run mode, the action writes only a migration report.
+8. In apply mode, the action:
+   - recreates `World.md`
+   - recreates `Campaign.md`
+   - migrates legacy notes into the new campaign structure
+   - copies staged resources
+   - writes a migration report
+9. Reports are written to `_system/migrations/reports/`.
+
+### Output
+
+Dry-run output:
+
+- one migration report note
+
+Apply output:
+
+- `Worlds/<TargetWorld>/World.md`
+- `Worlds/<TargetWorld>/Ressources/`
+- `Worlds/<TargetWorld>/<TargetCampaign>/Campaign.md`
+- migrated campaign notes and resources
+- one migration report note
+
+Preparation output:
+
+- updated staged markdown notes in `_system/migrations/_import/legacy-worlds/<LegacyWorld>/`
+- staged copied assets in `_system/migrations/_import/legacy-worlds/<LegacyWorld>/Ressources/`
+- one prep report note
 
 ## Workflow Diagram
 

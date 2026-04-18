@@ -16,6 +16,20 @@ type command
 action QuickAdd: create-campaign
 ```
 
+## Migration
+
+```button
+name Prep Legacy Import
+type command
+action QuickAdd: prepare-legacy-world-import
+```
+
+```button
+name Run Legacy Migration
+type command
+action QuickAdd: migrate-legacy-world
+```
+
 ```dataview
 TABLE WITHOUT ID
   link(file.path, world) as "World",
