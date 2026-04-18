@@ -486,9 +486,12 @@ def build_world_knowledge_section(target_world: str) -> str:
     return (
         "### World knowledge\n\n"
         "```dataview\n"
-        'TABLE file.link as "Note", type as "Type", description as "Description"\n'
+        'TABLE WITHOUT ID link(file.path, entity) as "Entity", type as "Type", description as "Description"\n'
         f'FROM "Worlds/{target_world}"\n'
-        f'WHERE file.folder = "Worlds/{target_world}" AND file.name != "World"\n'
+        "WHERE \n"
+        "  file.path != this.file.path AND\n"
+        '  type != "session" AND\n'
+        '  type != "campaign"\n'
         "SORT file.name ASC\n"
         "```\n"
     )

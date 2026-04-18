@@ -93,9 +93,12 @@ function buildCampaignsSection(folderPath) {
 function buildWorldKnowledgeSection(folderPath) {
     let content = "### World knowledge\n\n";
     content += "```dataview\n";
-    content += 'TABLE file.link as "Note", type as "Type", description as "Description"\n';
+    content += 'TABLE WITHOUT ID link(file.path, entity) as "Entity", type as "Type", description as "Description"\n';
     content += `FROM "${folderPath}"\n`;
-    content += `WHERE file.folder = "${folderPath}" AND file.name != "World"\n`;
+    content += "WHERE \n";
+    content += "  file.path != this.file.path AND\n";
+    content += '  type != "session" AND\n';
+    content += '  type != "campaign"\n';
     content += "SORT file.name ASC\n";
     content += "```\n";
     return content;
