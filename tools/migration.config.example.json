@@ -1,0 +1,13 @@
+{
+  "sourceWorldsRoot": ".../ObsidianVault/TTRPG/Worlds/",
+  "targetVaultRoot": ".../ObsidianVault/TTRPGv2/Worlds/",
+  "worlds": [
+    {
+      "sourceWorld": "WorldName",
+      "targetWorld": "WorldName",
+      "targetCampaign": "CampaignName",
+      "role": "player",
+      "timelineNotes": ""
+    }
+  ]
+}
