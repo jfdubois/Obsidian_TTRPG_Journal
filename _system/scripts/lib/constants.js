@@ -10,8 +10,12 @@ export const DEFAULT_SPEED = "30 ft.";
 // File paths
 export const PATHS = {
     SRD_INDEX: "_system/srd/5etools-src/data/bestiary/index.json",
+    SRD_FLUFF_INDEX: "_system/srd/5etools-src/data/bestiary/fluff-index.json",
     SRD_BESTIARY: "_system/srd/5etools-src/data/bestiary",
     SRD_SOURCES: "_system/srd/sources.md",
+    SRD_PACKAGE_JSON: "_system/srd/5etools-src/package.json",
+    SRD_BOOKS: "_system/srd/5etools-src/data/books.json",
+    SRD_ADVENTURES: "_system/srd/5etools-src/data/adventures.json",
     WORLDS_FOLDER: "Worlds",
     TEMPLATES_FOLDER: "_system/templates",
     MIGRATIONS_ROOT_FOLDER: "_system/migrations",

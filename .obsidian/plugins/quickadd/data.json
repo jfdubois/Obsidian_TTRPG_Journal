@@ -87,6 +87,26 @@
       }
     },
     {
+      "id": "6c92407c-8d96-4d33-b9f6-2fe6eec6d4d2",
+      "name": "refresh-monster-sources",
+      "type": "Macro",
+      "command": true,
+      "runOnStartup": false,
+      "macro": {
+        "name": "refresh-monster-sources",
+        "id": "33bcf1cc-8d73-4e55-a44a-d752d13f2d36",
+        "commands": [
+          {
+            "name": "refreshMonsterSources",
+            "type": "UserScript",
+            "id": "b05afb2d-d71c-4929-b1e6-26ca30c72f32",
+            "path": "_system/scripts/quickadd/refreshMonsterSources.js",
+            "settings": {}
+          }
+        ]
+      }
+    },
+    {
       "id": "37b0f59e-9039-4bef-925c-3e0c48d2962e",
       "name": "add-player-initiative",
       "type": "Macro",

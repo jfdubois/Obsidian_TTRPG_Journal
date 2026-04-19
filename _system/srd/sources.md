@@ -2,6 +2,19 @@
 
 This file defines which SRD sources are enabled for monster selection in encounters.
 
+## Actions
+
+```button
+name Refresh Monster Sources
+type command
+action QuickAdd: refresh-monster-sources
+```
+
+Use this button after updating `_system/srd/5etools-src` to refresh the available monster sources from `data/bestiary/index.json` and `data/bestiary/fluff-index.json`.
+Existing `enabled` values are preserved when a source still exists, and new sources default to `false` so they can be reviewed safely.
+
+_Current srd-src version: 2.22.0_
+
 ## 2014 Core Rulebooks
 
 - **MM**: `enabled: true` - Monster Manual - Core monster collection
@@ -55,7 +68,6 @@ This file defines which SRD sources are enabled for monster selection in encount
 - **SCC**: `enabled: false` - Strixhaven: A Curriculum of Chaos - Magic school setting
 - **EGW**: `enabled: false` - Explorer's Guide to Wildemount - Exandria/Critical Role setting
 - **VRGR**: `enabled: false` - Van Richten's Guide to Ravenloft - Horror domains setting
-- **TDCSR**: `enabled: false` - Tal'Dorei Campaign Setting Reborn - Critical Role setting
 
 ## Starter Sets & Introductory Adventures
 

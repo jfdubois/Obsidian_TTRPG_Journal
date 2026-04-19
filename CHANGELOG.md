@@ -17,7 +17,9 @@ All notable changes to this project will be documented in this file.
 - Rewrote `README.md` into a more standard public project format.
 - Linked the SOP to the rest of the project documentation set.
 - Refactored world and campaign creation actions to use shared builders.
+- Added a refreshable monster source configuration flow driven by the local `5etools-src` bestiary indexes, and updated the source header to show the current `srd-src` version.
 
 ### Docs
 
 - Established a repo-wide documentation workflow for feature work and public-facing updates.
+- Documented the monster source refresh workflow in the internal guidance and encounter docs.

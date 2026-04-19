@@ -115,12 +115,13 @@ The migration flow is designed to keep staged source files in place and write re
 ### Monster sources
 
 Edit `_system/srd/sources.md` to control which source books appear in the monster selector.
+Use the `Refresh Monster Sources` button at the top of that file after updating `_system/srd/5etools-src` to sync the available source list with the current bestiary indexes.
 
 Example:
 
 ```markdown
-- **MM**: enabled: true - Monster Manual
-- **VGM**: enabled: false - Volo's Guide to Monsters
+- **MM**: `enabled: true` - Monster Manual
+- **VGM**: `enabled: false` - Volo's Guide to Monsters
 ```
 
 By default, core rulebooks are enabled and the rest are disabled to keep the selector manageable.
