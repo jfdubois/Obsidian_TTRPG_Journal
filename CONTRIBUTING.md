@@ -7,7 +7,7 @@ This repository is an Obsidian vault template with automation scripts and suppor
 ## Before You Start
 
 - Read [README.md](README.md) for the public overview and setup steps.
-- Read [docs/SOP - TTRPG note creation.md](<docs/SOP - TTRPG note creation.md>) if your change affects note creation or user workflow.
+- Read [_system/docs/SOP - TTRPG note creation.md](<_system/docs/SOP - TTRPG note creation.md>) if your change affects note creation or user workflow.
 
 ## Local Setup
 
@@ -28,7 +28,7 @@ This repository is an Obsidian vault template with automation scripts and suppor
 If your change affects user-facing behavior, update the relevant files:
 
 - `README.md` for setup, feature overview, or usage changes
-- `docs/SOP - TTRPG note creation.md` for workflow and creation-flow changes
+- `_system/docs/SOP - TTRPG note creation.md` for workflow and creation-flow changes
 - `CHANGELOG.md` for notable changes
 
 ## Pull Request Checklist

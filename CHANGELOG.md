@@ -11,6 +11,8 @@ All notable changes to this project will be documented in this file.
 - Added shared world and campaign builders to keep canonical note generation aligned across creation and migration.
 - Added an Obsidian-native `migrate-legacy-world` QuickAdd command with dry-run and apply modes.
 - Added migration support files under `_system/scripts/actions/migration/` and `_system/migrations/schema.json`.
+- Added the `Iconize` community plugin to the tracked vault setup.
+- Added tracked default banner images under `_system/media/images/banners/`.
 
 ### Changed
 
@@ -18,8 +20,12 @@ All notable changes to this project will be documented in this file.
 - Linked the SOP to the rest of the project documentation set.
 - Refactored world and campaign creation actions to use shared builders.
 - Added a refreshable monster source configuration flow driven by the local `5etools-src` bestiary indexes, and updated the source header to show the current `srd-src` version.
+- Moved the documentation set from top-level `docs/` into `_system/docs/`.
+- Kept `TTRPG Game Index.md` under `Worlds/` as the tracked vault entry note.
+- Removed the retired top-level `tools/` migration folder after the Obsidian-native migration flow became the maintained path.
 
 ### Docs
 
 - Established a repo-wide documentation workflow for feature work and public-facing updates.
 - Documented the monster source refresh workflow in the internal guidance and encounter docs.
+- Updated contributor and maintenance references to point at `_system/docs/` and the current migration docs.

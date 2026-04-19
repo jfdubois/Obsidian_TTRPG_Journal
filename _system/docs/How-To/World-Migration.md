@@ -18,7 +18,7 @@ Before using this workflow:
 ## Open the Migration Actions
 
 1. Open `Worlds/TTRPG Game Index.md`.
-2. Use the migration actions in the `Migration` section.
+2. Use the migration actions in the `Migration` section of the index note.
 
 The available actions are:
 

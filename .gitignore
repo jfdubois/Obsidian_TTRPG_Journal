@@ -5,14 +5,14 @@
 .obsidian/plugins/**/build/
 .obsidian/plugins/**/*.log
 .DS_Store
-Thumbs.db
+.private/
 .directory
+.trash
+Thumbs.db
 Worlds/*
 !Worlds/TTRPG Game Index.md
 _system/media/images/miscs/*
 !_system/media/images/miscs/.gitkeep
-_system/media/images/banners/*
-!_system/media/images/banners/.gitkeep
 _system/srd/*
 !_system/srd/sources.md
 _system/migrations/_import/legacy-worlds/*
@@ -20,4 +20,4 @@ _system/migrations/_import/legacy-worlds/*
 _system/migrations/reports/*
 !_system/migrations/reports/.gitkeep
 **/.git/
-.private/
+

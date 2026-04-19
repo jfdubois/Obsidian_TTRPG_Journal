@@ -40,6 +40,7 @@ Required community plugins:
 - Buttons
 - Banners
 - Homepage
+- Iconize
 - Leaflet
 
 Recommended plugins:
@@ -129,7 +130,7 @@ By default, core rulebooks are enabled and the rest are disabled to keep the sel
 ## Documentation
 
 - [README.md](README.md): public project overview and setup
-- [docs/SOP - TTRPG note creation.md](<docs/SOP - TTRPG note creation.md>): detailed note-creation workflow reference
+- [_system/docs/SOP - TTRPG note creation.md](<_system/docs/SOP - TTRPG note creation.md>): detailed note-creation workflow reference
 - [CONTRIBUTING.md](CONTRIBUTING.md): contribution and pull request expectations
 - [CHANGELOG.md](CHANGELOG.md): human-readable record of notable changes
 
@@ -153,9 +154,11 @@ TTRPG-DEV/
 │           ├── E0001_Name.md
 │           ├── EntityName.md
 │           └── Ressources/
-├── _system/                     # Templates, scripts, migration logic, and system assets
-├── docs/                        # Project process and SOP documentation
-├── tools/                       # Utility scripts such as migrations
+├── _system/                     # Templates, scripts, docs, migration logic, and system assets
+│   ├── docs/                    # SOP and how-to documentation
+│   ├── media/images/banners/    # Default tracked banner images
+│   ├── migrations/              # Migration schema, staged imports, and reports
+│   └── scripts/                 # QuickAdd, JS Engine, and builder logic
 ├── CHANGELOG.md
 ├── CONTRIBUTING.md
 ├── LICENSE
@@ -169,6 +172,7 @@ Actual campaign content inside `Worlds/` is intentionally ignored so the reposit
 Latest notable update:
 
 - `Documentation and repo baseline`: added contributor docs, a Codex context sheet, GitHub templates, and a rewritten README.
+- `Vault structure sync`: moved documentation under `_system/docs`, added Iconize to the plugin setup, and retired the old top-level `tools/` migration area.
 
 See [CHANGELOG.md](CHANGELOG.md) for the full history.
 
