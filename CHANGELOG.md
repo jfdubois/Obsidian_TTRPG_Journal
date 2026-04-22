@@ -19,6 +19,9 @@ All notable changes to this project will be documented in this file.
 - Rewrote `README.md` into a more standard public project format.
 - Linked the SOP to the rest of the project documentation set.
 - Refactored world and campaign creation actions to use shared builders.
+- Fixed legacy world migration so a single staged campaign subfolder is flattened into the selected target campaign, with nested asset lookup following that legacy layout.
+- Fixed imported campaigns so `Add Session` detects existing session notes even when imported frontmatter values are quoted, and continues numbering from the highest existing session filename.
+- Fixed `Add Session` recap generation so it copies only the previous note's `Session Summary` section and no longer duplicates the `Recap` heading when the prior summary is empty.
 - Added a refreshable monster source configuration flow driven by the local `5etools-src` bestiary indexes, and updated the source header to show the current `srd-src` version.
 - Moved the documentation set from top-level `docs/` into `_system/docs/`.
 - Kept `TTRPG Game Index.md` under `Worlds/` as the tracked vault entry note.

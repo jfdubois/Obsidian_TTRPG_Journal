@@ -109,7 +109,7 @@ You can create structured entities in two ways:
 6. Start with `Dry Run` and review the generated migration report.
 7. Run `Apply Migration` once the report looks correct.
 
-The migration flow is designed to keep staged source files in place and write reports to `_system/migrations/reports/`.
+The migration flow is designed to keep staged source files in place, flatten a single legacy campaign subfolder into the selected target campaign when needed, and write reports to `_system/migrations/reports/`.
 
 ## Configuration
 

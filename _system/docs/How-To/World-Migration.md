@@ -82,7 +82,8 @@ After the migration completes:
 
 - a new `World.md` note is created in `Worlds/<TargetWorld>/`
 - a new `Campaign.md` note is created in `Worlds/<TargetWorld>/<TargetCampaign>/`
-- migrated notes are placed in the new campaign structure
+- migrated notes are placed directly in `Worlds/<TargetWorld>/<TargetCampaign>/`
+- if the staged legacy world still stores notes under a single top-level legacy campaign folder, that folder is flattened into the chosen target campaign
 - staged resources are copied into the new world and campaign `Ressources/` folders as needed
 - a migration report is created in `_system/migrations/reports/`
 

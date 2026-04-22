@@ -82,7 +82,8 @@ async function prepareLegacyWorldImport(app, detection) {
                 app,
                 detection.sourceRootPath,
                 detection.attachmentFolderPath,
-                target
+                target,
+                detection.legacyAssetSearchRoots
             );
 
             if (!sourcePath) {

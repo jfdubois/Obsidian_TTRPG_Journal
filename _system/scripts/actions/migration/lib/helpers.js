@@ -171,6 +171,39 @@ export function rewriteCampaignLevelPaths(content, sourceWorld, targetWorld, tar
     );
 }
 
+export function rewriteLegacyCampaignRootPaths(content, options = {}) {
+    const {
+        sourceRootPath = "",
+        sourceWorld = "",
+        legacyCampaignFolderName = "",
+        targetWorld = "",
+        targetCampaign = ""
+    } = options;
+
+    if (!legacyCampaignFolderName) {
+        return normalizeNewlines(content);
+    }
+
+    let next = normalizeNewlines(content);
+    const targetCampaignPath = `Worlds/${targetWorld}/${targetCampaign}`;
+
+    if (sourceRootPath) {
+        next = next.replaceAll(
+            `${sourceRootPath}/${legacyCampaignFolderName}`,
+            targetCampaignPath
+        );
+    }
+
+    if (sourceWorld) {
+        next = next.replaceAll(
+            `Worlds/${sourceWorld}/${legacyCampaignFolderName}`,
+            targetCampaignPath
+        );
+    }
+
+    return next;
+}
+
 export function rewriteWorldLevelPaths(content, sourceWorld, targetWorld) {
     return normalizeNewlines(content).replaceAll(
         `Worlds/${sourceWorld}/Ressources`,
@@ -215,12 +248,19 @@ export function getLinkBasename(target) {
     return String(target || "").split("/").pop()?.trim() || "";
 }
 
-export function resolveLinkedAssetSourcePath(app, sourceRootPath, attachmentFolderPath, target) {
+export function resolveLinkedAssetSourcePath(app, sourceRootPath, attachmentFolderPath, target, extraSearchRoots = []) {
+    const baseName = getLinkBasename(target);
     const candidates = [
         target,
         `${sourceRootPath}/${target}`,
-        attachmentFolderPath ? `${attachmentFolderPath}/${getLinkBasename(target)}` : "",
-        `${sourceRootPath}/${getLinkBasename(target)}`
+        `${sourceRootPath}/Ressources/${target}`,
+        attachmentFolderPath ? `${attachmentFolderPath}/${baseName}` : "",
+        `${sourceRootPath}/${baseName}`,
+        `${sourceRootPath}/Ressources/${baseName}`,
+        ...extraSearchRoots.flatMap(root => [
+            `${root}/${target}`,
+            baseName ? `${root}/${baseName}` : ""
+        ])
     ].filter(Boolean);
 
     for (const candidate of candidates) {

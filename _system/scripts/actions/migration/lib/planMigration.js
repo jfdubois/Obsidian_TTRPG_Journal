@@ -43,15 +43,21 @@ export function planMigration(app, detection, options) {
     }
 
     for (const entry of detection.entries) {
+        const normalizedRelativePath = entry.normalizedRelativePath || entry.relativePath;
+
         if (entry.isMarkdown) {
-            const targetPath = `${targetCampaignPath}/${entry.relativePath}`;
+            if (entry.isLegacyCampaignNote) {
+                continue;
+            }
+
+            const targetPath = `${targetCampaignPath}/${normalizedRelativePath}`;
             const actionType = classifyMarkdownAction(entry.noteType);
             const assetLinkMap = buildAssetLinkMap(
                 app,
                 detection,
                 entry.content,
                 `${targetCampaignPath}/Ressources`,
-                entry.relativePath,
+                normalizedRelativePath,
                 warnings,
                 assetWarnings,
                 validationFailures,
@@ -80,19 +86,43 @@ export function planMigration(app, detection, options) {
                 kind: actionType,
                 noteType: entry.noteType,
                 sourcePath: entry.file.path,
-                relativePath: entry.relativePath,
+                relativePath: normalizedRelativePath,
                 assetLinkMap,
                 targetPaths: [targetPath]
             });
             continue;
         }
 
-        const targetPathsForFile = entry.relativePath.startsWith("Ressources/")
-            ? [
-                `${targetCampaignPath}/${entry.relativePath}`,
-                `${targetWorldPath}/${entry.relativePath}`
-            ]
-            : [`${targetCampaignPath}/${entry.relativePath}`];
+        if (
+            entry.isInLegacyCampaignFolder &&
+            normalizedRelativePath.startsWith("Ressources/") &&
+            app.vault.getAbstractFileByPath(`${detection.sourceRootPath}/${normalizedRelativePath}`)
+        ) {
+            continue;
+        }
+
+        const candidateTargetPaths = normalizedRelativePath.startsWith("Ressources/")
+            ? entry.isInLegacyCampaignFolder
+                ? [`${targetCampaignPath}/${normalizedRelativePath}`]
+                : [
+                    `${targetCampaignPath}/${normalizedRelativePath}`,
+                    `${targetWorldPath}/${normalizedRelativePath}`
+                ]
+            : [`${targetCampaignPath}/${normalizedRelativePath}`];
+
+        const targetPathsForFile = [];
+        for (const targetPath of candidateTargetPaths) {
+            const existingSource = plannedCopySources.get(targetPath);
+            if (existingSource) {
+                continue;
+            }
+            plannedCopySources.set(targetPath, entry.file.path);
+            targetPathsForFile.push(targetPath);
+        }
+
+        if (targetPathsForFile.length === 0) {
+            continue;
+        }
 
         for (const targetPath of targetPathsForFile) {
             if (targetPaths.has(targetPath)) {
@@ -105,7 +135,7 @@ export function planMigration(app, detection, options) {
             kind: "copy",
             noteType: "",
             sourcePath: entry.file.path,
-            relativePath: entry.relativePath,
+            relativePath: normalizedRelativePath,
             targetPaths: targetPathsForFile
         });
     }
@@ -209,7 +239,8 @@ function resolveAssetSourcePath(app, detection, target) {
         app,
         detection.sourceRootPath,
         detection.attachmentFolderPath,
-        target
+        target,
+        detection.legacyAssetSearchRoots
     );
 }
 

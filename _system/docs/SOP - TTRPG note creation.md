@@ -183,6 +183,7 @@ The trigger chain is:
    - recreates `World.md`
    - recreates `Campaign.md`
    - migrates legacy notes into the new campaign structure
+   - flattens a single top-level legacy campaign folder into the chosen target campaign path when needed
    - copies staged resources
    - writes a migration report
 9. Reports are written to `_system/migrations/reports/`.

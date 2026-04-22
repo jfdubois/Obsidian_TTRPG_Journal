@@ -31,6 +31,8 @@ export async function detectLegacyWorld(app, sourceWorldName) {
     const legacyPlayerMap = parseLegacyPlayerMap(legacyPlayersSection);
     const worldNotesBody = buildMigratedWorldNotesBody(worldDocument.body, sourceWorldName);
     const attachmentFolderPath = app.vault.getConfig?.("attachmentFolderPath") || "";
+    const legacyCampaignFolderName = detectLegacyCampaignFolderName(sourceRoot);
+    const legacyAssetSearchRoots = buildLegacyAssetSearchRoots(sourceRootPath, legacyCampaignFolderName);
 
     const files = await walkFiles(sourceRoot);
     const entries = [];
@@ -42,22 +44,34 @@ export async function detectLegacyWorld(app, sourceWorldName) {
             continue;
         }
 
+        const normalizedRelativePath = normalizeLegacyRelativePath(relativePath, legacyCampaignFolderName);
         const isMarkdown = file.extension === "md";
         const frontmatter = isMarkdown ? getFrontmatter(app, file) : {};
         const content = isMarkdown ? await app.vault.read(file) : "";
         const noteType = isMarkdown ? detectNoteType(file.name, frontmatter) : "";
+        const isInLegacyCampaignFolder = Boolean(
+            legacyCampaignFolderName &&
+            relativePath.startsWith(`${legacyCampaignFolderName}/`)
+        );
+        const isLegacyCampaignNote = Boolean(
+            legacyCampaignFolderName &&
+            relativePath === `${legacyCampaignFolderName}/Campaign.md`
+        );
 
-        if (isMarkdown && !relativePath.includes("/") && !relativePath.startsWith("Ressources/")) {
+        if (isMarkdown && isTopLevelLegacyNote(relativePath, normalizedRelativePath, legacyCampaignFolderName)) {
             flatMarkdownNotes += 1;
         }
 
         entries.push({
             file,
             relativePath,
+            normalizedRelativePath,
             isMarkdown,
             noteType,
             content,
             frontmatter,
+            isInLegacyCampaignFolder,
+            isLegacyCampaignNote,
             needsManualReview: Boolean(isMarkdown && frontmatter.type && !noteType && !isEntityType(String(frontmatter.type).toLowerCase()))
         });
     }
@@ -73,10 +87,12 @@ export async function detectLegacyWorld(app, sourceWorldName) {
         worldContent,
         worldNotesBody,
         attachmentFolderPath,
+        legacyCampaignFolderName,
+        legacyAssetSearchRoots,
         legacyPlayersSection,
         legacyPlayerMap,
         entries,
-        isFlatLegacyWorld: flatMarkdownNotes > 0
+        isFlatLegacyWorld: flatMarkdownNotes > 0 || Boolean(legacyCampaignFolderName)
     };
 }
 
@@ -89,4 +105,50 @@ function buildMigratedWorldNotesBody(body, sourceWorldName) {
 function getFrontmatter(app, file) {
     const frontmatter = app.metadataCache.getFileCache(file)?.frontmatter || {};
     return frontmatter;
+}
+
+function detectLegacyCampaignFolderName(sourceRoot) {
+    const candidates = (sourceRoot?.children || [])
+        .filter(child => child?.children && child.name !== "Ressources")
+        .filter(child => child.children.some(grandChild => !grandChild?.children && grandChild.name === "Campaign.md"));
+
+    return candidates.length === 1 ? candidates[0].name : "";
+}
+
+function buildLegacyAssetSearchRoots(sourceRootPath, legacyCampaignFolderName) {
+    if (!legacyCampaignFolderName) {
+        return [];
+    }
+
+    return [
+        `${sourceRootPath}/${legacyCampaignFolderName}/Ressources`,
+        `${sourceRootPath}/${legacyCampaignFolderName}`
+    ];
+}
+
+function normalizeLegacyRelativePath(relativePath, legacyCampaignFolderName) {
+    if (!legacyCampaignFolderName) {
+        return relativePath;
+    }
+
+    const prefix = `${legacyCampaignFolderName}/`;
+    return relativePath.startsWith(prefix)
+        ? relativePath.slice(prefix.length)
+        : relativePath;
+}
+
+function isTopLevelLegacyNote(relativePath, normalizedRelativePath, legacyCampaignFolderName) {
+    if (relativePath.startsWith("Ressources/")) {
+        return false;
+    }
+
+    if (!relativePath.includes("/")) {
+        return true;
+    }
+
+    if (!legacyCampaignFolderName || !relativePath.startsWith(`${legacyCampaignFolderName}/`)) {
+        return false;
+    }
+
+    return !normalizedRelativePath.includes("/") && normalizedRelativePath !== "Campaign.md";
 }

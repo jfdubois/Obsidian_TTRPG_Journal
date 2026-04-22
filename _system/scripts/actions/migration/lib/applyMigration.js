@@ -17,6 +17,7 @@ import {
     normalizeNewlines,
     parseMarkdownDocument,
     rewriteCampaignLevelPaths,
+    rewriteLegacyCampaignRootPaths,
     rewriteLinkedAssetPaths,
     rewriteWorldLevelPaths,
     serializeFrontmatter
@@ -113,6 +114,8 @@ export async function applyMigration(app, detection, plan) {
             content,
             frontmatter,
             sourceWorld: detection.sourceWorldName,
+            sourceRootPath: detection.sourceRootPath,
+            legacyCampaignFolderName: detection.legacyCampaignFolderName,
             targetWorld: plan.targetWorld,
             targetCampaign: plan.targetCampaign,
             legacyPlayerMap: detection.legacyPlayerMap,
@@ -137,6 +140,8 @@ function migrateMarkdownNote({
     content,
     frontmatter,
     sourceWorld,
+    sourceRootPath,
+    legacyCampaignFolderName,
     targetWorld,
     targetCampaign,
     legacyPlayerMap,
@@ -146,7 +151,18 @@ function migrateMarkdownNote({
     const document = parseMarkdownDocument(content);
     const noteType = detectNoteType(fileName, frontmatter);
     const rewrittenBody = rewriteLinkedAssetPaths(
-        rewriteCampaignLevelPaths(document.body, sourceWorld, targetWorld, targetCampaign),
+        rewriteCampaignLevelPaths(
+            rewriteLegacyCampaignRootPaths(document.body, {
+                sourceRootPath,
+                sourceWorld,
+                legacyCampaignFolderName,
+                targetWorld,
+                targetCampaign
+            }),
+            sourceWorld,
+            targetWorld,
+            targetCampaign
+        ),
         assetLinkMap
     );
 
