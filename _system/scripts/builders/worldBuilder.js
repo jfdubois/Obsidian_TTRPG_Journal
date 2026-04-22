@@ -8,7 +8,7 @@ export function buildWorldNote({ worldName, role, folderPath, worldNotesBody = "
     }
     content += buildActionsSection();
     content += buildCampaignsSection(folderPath);
-    content += buildWorldKnowledgeSection(folderPath);
+    content += buildWorldKnowledgeSection(folderPath, worldName);
     return content;
 }
 
@@ -27,6 +27,7 @@ function buildWorldFrontmatter(worldName, role) {
 
 function buildWorldHeader(worldName) {
     let content = `# The world of ${worldName}\n\n`;
+    content += "## Introduction\n\n";
     content += "## World Notes\n\n";
     return content;
 }
@@ -52,16 +53,27 @@ function buildCampaignsSection(folderPath) {
     return content;
 }
 
-function buildWorldKnowledgeSection(folderPath) {
+function buildWorldKnowledgeSection(folderPath, worldName) {
     let content = "### World knowledge\n\n";
-    content += "```dataview\n";
-    content += 'TABLE WITHOUT ID link(file.path, entity) as "Entity", type as "Type", description as "Description"\n';
-    content += `FROM "${folderPath}"\n`;
-    content += "WHERE \n";
-    content += "  file.path != this.file.path AND\n";
-    content += '  type != "session" AND\n';
-    content += '  type != "campaign"\n';
-    content += "SORT file.name ASC\n";
+    content += "```base\n";
+    content += "views:\n";
+    content += "  - type: table\n";
+    content += "    name: WorldView\n";
+    content += "    filters:\n";
+    content += "      and:\n";
+    content += `        - world == "${worldName}"\n`;
+    content += "        - file.name != \"Campaign\"\n";
+    content += "        - '!type.contains(\"world\")'\n";
+    content += "        - '!type.contains(\"session\")'\n";
+    content += "        - '!type.contains(\"encounter\")'\n";
+    content += "    order:\n";
+    content += "      - file.name\n";
+    content += "      - campaign\n";
+    content += "      - plane\n";
+    content += "      - region\n";
+    content += "      - location\n";
+    content += "      - type\n";
+    content += "      - description\n";
     content += "```\n";
     return content;
 }

@@ -1,3 +1,7 @@
+async function importFreshModule(app, vaultPath) {
+    return import(app.vault.adapter.getResourcePath(vaultPath));
+}
+
 module.exports = async (params) => {
     try {
         const jsEngine = params.app.plugins.plugins['js-engine'];
@@ -6,7 +10,7 @@ module.exports = async (params) => {
             return;
         }
 
-        const module = await jsEngine.api.importJs('_system/scripts/actions/encounter/createEncounter.js');
+        const module = await importFreshModule(params.app, '_system/scripts/actions/encounter/createEncounter.js');
         await module.run({
             app: params.app,
             quickAddApi: params.quickAddApi

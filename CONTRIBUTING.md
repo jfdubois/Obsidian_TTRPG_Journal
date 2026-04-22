@@ -41,6 +41,8 @@ Before opening a pull request, confirm that:
 - manual testing or verification steps are included
 - follow-up work is noted if the change is intentionally incomplete
 
+When a change touches `_system/scripts/quickadd/`, `_system/scripts/actions/`, or `_system/scripts/builders/`, run the checklist in [_system/docs/QA - QuickAdd action loading.md](<_system/docs/QA - QuickAdd action loading.md>).
+
 ## Reporting Issues
 
 When reporting a bug, include:

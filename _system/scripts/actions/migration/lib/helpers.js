@@ -5,6 +5,7 @@ export const LEGACY_WORLD_SECTION_TITLES_TO_DROP = new Set([
     "Actions",
     "Sessions",
     "World's knowledge",
+    "World knowledge",
     "Campaigns",
     "Campaign knowledge",
     "DM: Encounters"
@@ -72,6 +73,10 @@ export function toYamlValue(value) {
 
 export function stripLeadingWorldTitle(body) {
     return normalizeNewlines(body).replace(/^#\s+The world of[^\n]*\n+/i, "");
+}
+
+export function stripLeadingWorldNotesHeading(body) {
+    return normalizeNewlines(body).replace(/^##\s+World Notes\s*\n+/i, "");
 }
 
 export function removeNamedSections(markdown, sectionTitles) {

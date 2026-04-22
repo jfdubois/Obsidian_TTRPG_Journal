@@ -73,6 +73,8 @@ The note-creation system is split across two creation engines:
 
 `Homepage` makes `Worlds/TTRPG Game Index.md` the startup entry point.
 
+QuickAdd wrapper scripts under `_system/scripts/quickadd/` should load action modules through Obsidian resource URLs with their cache-busting query intact. Avoid `js-engine.api.importJs()` for vault scripts because it strips that query and can reuse stale module code after edits.
+
 ## Current Hierarchy
 
 The vault now uses a three-layer note model:

@@ -9,6 +9,7 @@ import {
     parseMarkdownDocument,
     removeNamedSections,
     stripLeadingWorldTitle,
+    stripLeadingWorldNotesHeading,
     walkFiles
 } from './helpers.js';
 
@@ -98,6 +99,7 @@ export async function detectLegacyWorld(app, sourceWorldName) {
 
 function buildMigratedWorldNotesBody(body, sourceWorldName) {
     let worldNotes = stripLeadingWorldTitle(body);
+    worldNotes = stripLeadingWorldNotesHeading(worldNotes);
     worldNotes = removeNamedSections(worldNotes, LEGACY_WORLD_SECTION_TITLES_TO_DROP);
     return cleanMarkdownSpacing(worldNotes);
 }

@@ -8,6 +8,8 @@ This project separates shared world knowledge from campaign-specific play spaces
 
 Active development. The vault is already usable, but the workflow is still evolving and some areas are tailored to the maintainer's current Obsidian setup.
 
+Local QuickAdd action scripts are loaded through cache-busted Obsidian resource URLs so builder and action edits apply after an Obsidian reload instead of sticking to stale cached modules.
+
 ## Highlights
 
 - Shared `World.md` reference notes with multiple campaign hubs per world
